@@ -1,0 +1,101 @@
+@api=http://localhost:3000/api/users
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YThjOWRiYTAyZGI2MjlhNTE2NGFiMCIsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoiUHVua0hhemFyZDA5NSIsImlhdCI6MTcyMjc5MzU1MSwiZXhwIjoxNzIyODA3OTUxfQ.bmmPV5PCdkz_GI7VUpIGmVD6rhKMq1gcVF1D2JX7wEk
+
+###-------------Login User------------###
+###----->
+POST {{api}}/login
+Content-Type: application/json
+
+{
+    "email":"iktisad.rashid@gmail.com",
+    "password": "securepassword123"
+}
+
+
+###-----------------------------------###
+
+###------------Create User------------###
+###----->
+POST {{api}}/signup
+Content-Type: application/json
+
+{
+  "username": "PunkHazard095",
+  "email": "iktisad.rashid@gmail.com",
+  "password": "securepassword123",
+  "dob": "1995-10-30",
+  "profile": {
+    "firstName": "Iktisad",
+    "lastName": "Rashid"
+  }
+}
+
+###-----------------------------------###
+
+
+###-------------Update User------------###
+###----->
+PUT {{api}}/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+// "email": "ine.newemail@example.com",
+  "profile": {
+    "bio": "Updated content creator and editor",
+    "profilePicture": "https://example.com/profile2_new.jpg",
+    "socialLinks": {
+      "linkedin": "https://linkedin.com/in/iktisad",
+      "twitter": "https://twitter.com/iktisad",
+      "facebook": "https://facebook.com/iktisad",
+      "instagram": "https://instagram.com/iktisad"
+    }
+  }
+}
+
+###------------------------------------###
+
+###-------Get logged in user-----------###
+###----->
+GET {{api}}/me
+Authorization: Bearer {{token}}
+###------------------------------------###
+
+
+
+###-------------Admin Search-----------###
+###----->
+GET {{api}}?q=Jane
+Authorization: Bearer {{token}}
+###---->
+GET {{api}}?q=john.doe@example.com
+Authorization: Bearer {{token}}
+
+###------------------------------------###
+
+###-------Profile Photo Upload---------###
+
+# POST {{api}}/me/photo
+# Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+# Authorization: Bearer {{token}}
+
+# ------WebKitFormBoundary7MA4YWxkTrZu0gW
+# Content-Disposition: form-data; name="photo"; filename="D:\icarus\bangla_web_magazine\sample\profile.jpg"
+# Content-Type: image/jpeg
+
+# <D:\icarus\bangla_web_magazine\sample\profile.jpg
+
+# ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+### Upload User Profile Photo
+POST {{api}}/me/photo
+Content-Type: multipart/form-data boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{token}}
+
+----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="photo"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< ../../../sample/profile.jpg
+----WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###-----------------------------------###
