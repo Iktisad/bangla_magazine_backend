@@ -70,4 +70,4 @@ Each of these features can be further elaborated with examples or links to relev
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
