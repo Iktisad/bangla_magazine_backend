@@ -3,7 +3,9 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { User } from "./user.model.js";
 import {
+    BadRequestException,
     ConflictException,
+    NotFoundException,
     UnauthorizedException,
 } from "../exceptions/http.exception.js";
 import dotenv from "dotenv";
@@ -38,6 +40,7 @@ export class UserService {
     }
 
     async verifyUser(token) {
+        jwt.verify(token, process.env.JWT_SECRET || "lameSecret");
         const user = await User.findOne({ verificationToken: token });
         if (!user) {
             throw new UnauthorizedException("Invalid verification token");
@@ -83,13 +86,33 @@ export class UserService {
     }
 
     async getUserById(userId) {
-        return User.findById(userId).select("-password -verificationToken");
+        if (!userId) {
+            throw new BadRequestException("User ID is required");
+        }
+
+        const user = await User.findById(userId).select(
+            "-password -verificationToken"
+        );
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
+
+        return user;
     }
 
     async updateUser(userId, { body }) {
-        return User.findByIdAndUpdate(userId, body, { new: true }).select(
-            "-password -verificationToken"
-        );
+        if (!userId) {
+            throw new BadRequestException("User ID is required");
+        }
+
+        const user = await User.findByIdAndUpdate(userId, body, {
+            new: true,
+        }).select("-password -verificationToken");
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
+
+        return user;
     }
 
     async getAllUsers({ query }) {
@@ -103,7 +126,7 @@ export class UserService {
                 { email: new RegExp(q, "i") },
             ];
         }
-        return User.find(filter).select("-password -verificationToken");
+        return await User.find(filter).select("-password -verificationToken");
     }
 
     async resetVerificationEmailToken(email) {

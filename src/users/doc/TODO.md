@@ -9,7 +9,10 @@
 ✅ Check user exists function implemented as api
 ✅ Verify email.
 ✅ Profile picture upload and location storage needs to be implemented
+✅ check for token expiary during validation of token.
+✅ Implemented logger
 🔴 Get a new verification link if the old link expires.
+🔴 handle and throw email service error
 
 ⚠️ Email verfication has to be turned on from users contoller signup method
 

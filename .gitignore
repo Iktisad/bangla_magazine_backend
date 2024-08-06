@@ -130,4 +130,5 @@ dist
 .pnp.*
 
 # image uploads
-uploads/
+uploads/*
+/sample/*

@@ -1,39 +1,39 @@
-class AppException extends Error {
+class HttpException extends Error {
     constructor(message, statusCode) {
         super(message);
         this.statusCode = statusCode;
-        this.isOperational = true;
+        // this.isOperational = true;
 
         Error.captureStackTrace(this, this.constructor);
     }
 }
 
-export class NotFoundException extends AppException {
+export class NotFoundException extends HttpException {
     constructor(message = "Resource not found") {
         super(message, 404);
     }
 }
 
-export class BadRequestException extends AppException {
+export class BadRequestException extends HttpException {
     constructor(message = "Invalid input") {
         super(message, 400);
     }
 }
 
-export class UnauthorizedException extends AppException {
+export class UnauthorizedException extends HttpException {
     constructor(message = "Unauthorized") {
         super(message, 401);
     }
 }
 
-export class ConflictException extends AppException {
+export class ConflictException extends HttpException {
     constructor(message = "Conflict") {
         super(message, 409);
     }
 }
 
-export class InternalServerException extends AppException {
-    constructor(message = "Conflict") {
-        super(message, 500);
-    }
-}
+// export class InternalServerException extends HttpException {
+//     constructor(message = "Conflict") {
+//         super(message, 500);
+//     }
+// }

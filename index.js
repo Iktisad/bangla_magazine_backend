@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import di_container from "./src/di_container.js";
@@ -5,7 +6,10 @@ import userRoutes from "./src/users/user.routes.js";
 // import articleRoutes from "./src/magazine/article/article.routes.js";
 // import categoryRoutes from "./src/magazine/category/category.routes.js";
 // import podcastRoutes from "./src/podcast/podcast.routes.js";
-import dotenv from "dotenv";
+import {
+    errorLogger,
+    requestLogger,
+} from "./src/middleware/logger.middleware.js";
 
 dotenv.config();
 
@@ -27,6 +31,7 @@ class App {
         this.app.use(express.json());
     }
     initRoutes() {
+        this.app.use(requestLogger);
         this.app.use(
             "/api/users",
             userRoutes(di_container.getController("userController"))
@@ -49,6 +54,8 @@ class App {
             console.log("Hello World!");
             res.send("<h1>Hello World!</h1>");
         });
+
+        this.app.use(errorLogger);
     }
     connectToDatabase() {
         mongoose

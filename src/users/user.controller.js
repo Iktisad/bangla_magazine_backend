@@ -1,3 +1,11 @@
+import {
+    BadRequestException,
+    ConflictException,
+    NotFoundException,
+    UnauthorizedException,
+} from "../exceptions/http.exception";
+import logger from "../service/logger.service.js";
+
 export class UserController {
     constructor(UserService, EmailService, PhotoService) {
         this.userService = UserService;
@@ -24,16 +32,17 @@ export class UserController {
 
             if (user) {
                 return res.status(200).json({ exists: true });
-            } else {
-                return res.status(200).json({ exists: false });
             }
+
+            return res.status(200).json({ exists: false });
         } catch (error) {
-            if (error.isOperational) {
-                res.status(error.statusCode).json({ message: error.message });
-            } else {
-                console.error(error);
-                res.status(500).json({ message: "Internal server error" });
+            if (error instanceof ConflictException) {
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
             }
+            logger.error(error.message);
+            next(error);
         }
     }
     // User signup
@@ -42,17 +51,21 @@ export class UserController {
             const user = await this.userService.createUser(req.body);
 
             await this.emailService.sendVerificationEmail(user);
-            res.status(201).send(
-                "Signup successful! Please check your email to verify your account."
-            );
+            return res
+                .status(201)
+                .send(
+                    "Signup successful! Please check your email to verify your account."
+                );
             // Send verification email (Implement sendVerificationEmail function)
         } catch (error) {
-            if (error.isOperational) {
-                res.status(error.statusCode).json({ message: error.message });
-            } else {
-                console.error(error);
-                res.status(500).json({ message: "Internal server error" });
+            if (error instanceof ConflictException) {
+                logger.warn(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
             }
+            logger.error(error.message);
+            next(error);
         }
     }
 
@@ -64,14 +77,16 @@ export class UserController {
                 email,
                 password
             );
-            res.status(200).json({ token });
+            return res.status(200).json({ token });
         } catch (error) {
-            if (error.isOperational) {
-                res.status(error.statusCode).json({ message: error.message });
-            } else {
-                console.error(error);
-                res.status(500).json({ message: "Internal server error" });
+            if (error instanceof UnauthorizedException) {
+                logger.warn(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
             }
+            logger.error(error.message);
+            next(error);
         }
     }
 
@@ -79,16 +94,20 @@ export class UserController {
         try {
             const { token } = req.query;
             await this.userService.verifyUser(token);
-            res.status(200).send("Account verified! You can now log in.");
+            return res
+                .status(200)
+                .send("Account verified! You can now log in.");
         } catch (error) {
-            if (error.isOperational) {
+            if (error instanceof UnauthorizedException) {
+                logger.warn(error.message);
                 res.status(error.statusCode).json({ message: error.message });
             } else {
-                console.error(error);
-                res.status(500).json({ message: "Internal server error" });
+                logger.error(error.message);
+                next(error);
             }
         }
     }
+    //? Needs to be tested and error needs to be handled
     async resendVerificationEmail(req, res) {
         try {
             const { email } = req.body;
@@ -98,11 +117,12 @@ export class UserController {
                 email
             );
             await this.emailService.sendVerificationEmail(user);
-            res.status(200).json({
+            return res.status(200).json({
                 message: "Verification email resent successfully",
                 user,
             });
         } catch (error) {
+            logger.warn(error.message);
             res.status(400).json({ message: error.message });
         }
     }
@@ -110,14 +130,22 @@ export class UserController {
     async getProfile(req, res) {
         try {
             const user = await this.userService.getUserById(req.user.id);
-            res.status(200).json(user);
+            return res.status(200).json(user);
         } catch (error) {
-            if (error.isOperational) {
-                res.status(error.statusCode).json({ message: error.message });
-            } else {
-                console.error(error);
-                res.status(500).json({ message: "Internal server error" });
+            if (error instanceof BadRequestException) {
+                logger.warn(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
             }
+            if (error instanceof NotFoundException) {
+                logger.warn(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
+            logger.error(error.message);
+            next(error);
         }
     }
 
@@ -127,12 +155,20 @@ export class UserController {
             const user = await this.userService.updateUser(req.user.id, req);
             res.status(200).json(user);
         } catch (error) {
-            if (error.isOperational) {
-                res.status(error.statusCode).json({ message: error.message });
-            } else {
-                console.error(error);
-                res.status(500).json({ message: "Internal server error" });
+            if (error instanceof BadRequestException) {
+                logger.warn(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
             }
+            if (error instanceof NotFoundException) {
+                logger.warn(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
+            logger.error(error.message);
+            next(error);
         }
     }
 
@@ -140,16 +176,13 @@ export class UserController {
     async getAllUser(req, res) {
         try {
             const users = await this.userService.getAllUsers(req);
-            res.status(200).json(users);
+            return res.status(200).json(users);
         } catch (error) {
-            if (error.isOperational) {
-                res.status(error.statusCode).json({ message: error.message });
-            } else {
-                console.error(error);
-                res.status(500).json({ message: "Internal server error" });
-            }
+            logger.error(error.message);
+            next(error);
         }
     }
+    // ? needs more testing and error handling
     async uploadUserProfilePhoto(req, res) {
         try {
             const photoUrl = this.photoService.localPhotoUpload(req.file);
@@ -161,17 +194,13 @@ export class UserController {
                 },
             });
 
-            res.status(200).json({
+            return res.status(200).json({
                 message: "Photo uploaded successfully",
                 user,
             });
         } catch (error) {
-            if (error.isOperational) {
-                res.status(error.statusCode).json({ message: error.message });
-            } else {
-                console.error(error);
-                res.status(500).json({ message: "Internal server error" });
-            }
+            logger.error(error.message);
+            next(error);
         }
     }
 }
