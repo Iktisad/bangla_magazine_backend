@@ -101,12 +101,12 @@ npm run start:dev
 
 ## ✨ Features
 
--   **🔒 User Authentication**: Secure login and registration system with JWT (JSON Web Tokens) to ensure user data privacy and protection.
--   **🔄 RESTful API**: A set of RESTful endpoints to manage resources, providing CRUD operations for entities like users, products, and orders.
+-   **🔒 User Authentication**: Secure login and registration system with **_JWT (JSON Web Tokens)_** to ensure user data privacy and protection.
+-   **🔄 RESTful API**: A set of RESTful endpoints to manage resources, providing CRUD operations for entities like **_users_**, **_magazine_**, **_artwork_** and **_podcasts_**.
 -   **🛡️ Role-Based Access Control**: Fine-grained access control with different user roles (admin, author, and contributor) to manage permissions and access to various parts of the application.
--   **✔️ Data Validation**: Robust data validation using `express-validator` to ensure that all incoming data is correctly formatted and prevents malicious inputs.
--   **📝 Logging**: Comprehensive logging system with Winston to track application behavior and errors for easier debugging and monitoring.
--   **📖 API Documentation**: Interactive API documentation created with REST CLIENT of VSCode, making it easy for developers to understand and use the API.
+-   **✔️ Data Validation**: Robust data validation using `Express-Validator` to ensure that all incoming data is correctly formatted and prevents malicious inputs.
+-   **📝 Logging**: Comprehensive logging system with `Winston` to track application behavior and errors for easier debugging and monitoring.
+-   **📖 API Documentation**: Interactive API documentation created with `Rest Client` of VSCode extension, making it easy for developers to understand and use the API.
 -   **⚠️ Error Handling**: Centralized error handling to manage application errors gracefully and provide meaningful feedback to users.
 -   **🌐 Environment Configuration**: Flexible configuration management for different environments (development, staging, production) using dotenv.
 
