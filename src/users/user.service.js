@@ -8,9 +8,7 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from "../exceptions/http.exception.js";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { jwt_var } from "../../config/config.js";
 
 export class UserService {
     async createUser(body) {
@@ -40,7 +38,7 @@ export class UserService {
     }
 
     async verifyUser(token) {
-        jwt.verify(token, process.env.JWT_SECRET || "lameSecret");
+        jwt.verify(token, jwt_var.secret || "lameSecret");
         const user = await User.findOne({ verificationToken: token });
         if (!user) {
             throw new UnauthorizedException("Invalid verification token");
@@ -77,9 +75,9 @@ export class UserService {
 
         const token = jwt.sign(
             { id: user._id, role: user.role, username: user.username },
-            process.env.JWT_SECRET || "lameSecret",
+            jwt_var.secret || "lameSecret",
             {
-                expiresIn: process.env.JWT_EXPIRATION || "1h",
+                expiresIn: jwt_var.expiration || "1h",
             }
         );
         return token;

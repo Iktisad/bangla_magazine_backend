@@ -6,6 +6,7 @@ A brief description of what your project does.
 
 -   [Installation](#installation)
 -   [Usage](#usage)
+-   [Route Document](#route_document)
 -   [Features](#features)
 -   [Contributing](#contributing)
 -   [License](#license)
@@ -22,8 +23,46 @@ A brief description of what your project does.
     cd bangla_magazine_backend
     ```
 3. Install dependencies:
+
     ```bash
     npm install
+    ```
+
+4. #### Set up your environment-variables by creating a `.env` file in the root directory of the project:
+
+    ```plaintext
+    # .env
+
+    # Application Port
+
+        ## DEV
+            - PORT=3000
+            - Request at http://localhost:3000
+
+        ## PROD
+           - PORT=5212
+           - BASE_URL= to_be_announced
+
+    # Database Connection
+        ## DEV
+           - DB_HOST=localhost
+           - DB_PORT=27017
+
+        ## PROD
+           - DB_NAME=bangla_web_magazine
+           - DB_HOST=to_be_announced
+           - DB_PORT=To_Be_Announced
+           - DB_USER=Your_Username
+           - DB_PASS=Your_Password
+
+    # JWT Secret for Authentication
+        - JWT_SECRET=Your_JWT_Secretkey
+
+    # Other Environment Variables
+        ## Check package.json scripts section
+
+            - NODE_ENV=DEV
+
     ```
 
 ## Usage
@@ -40,9 +79,9 @@ For development mode with hot reloading:
 npm run start:dev
 ```
 
-## Features
+## Route_Document
 
-Certainly! Here's an example of how you can describe features in your `README.md`:
+-   aslkdj
 
 ## Features
 

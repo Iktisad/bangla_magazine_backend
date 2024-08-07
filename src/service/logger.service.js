@@ -40,7 +40,7 @@ class LoggerService {
                     filename: "application-%DATE%.log",
                     datePattern: "YYYY-MM-DD",
                     maxSize: "20m",
-                    maxFiles: "7d", // Keep logs for 14 days
+                    maxFiles: "7d", // Keep logs for 7 days
                 }),
 
                 new transports.DailyRotateFile({
@@ -49,7 +49,7 @@ class LoggerService {
                     filename: "error-%DATE%.log",
                     datePattern: "YYYY-MM-DD",
                     maxSize: "20m",
-                    maxFiles: process.env.LOG_ROTATION, // Keep error logs for 30 days
+                    maxFiles: "7d", // Keep error logs for 7 days
                 }),
             ],
         });

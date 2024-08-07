@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import di_container from "./src/di_container.js";
@@ -6,19 +5,15 @@ import userRoutes from "./src/users/user.routes.js";
 // import articleRoutes from "./src/magazine/article/article.routes.js";
 // import categoryRoutes from "./src/magazine/category/category.routes.js";
 // import podcastRoutes from "./src/podcast/podcast.routes.js";
+import { db, port, NODE_ENV } from "./config/config.js";
 import {
     errorLogger,
     requestLogger,
 } from "./src/middleware/logger.middleware.js";
-
-dotenv.config();
+import logger from "./src/service/logger.service.js";
 
 class App {
     constructor() {
-        this.config = {
-            PORT: process.env.PORT,
-            DB_URL: process.env.DB_URL,
-        };
         this.app = express();
         this.initMiddleware();
         this.initRoutes();
@@ -58,16 +53,32 @@ class App {
         this.app.use(errorLogger);
     }
     connectToDatabase() {
+        let url = `mongodb://${db.host}:${db.port}/${db.name}`;
+        if (NODE_ENV !== "DEV") {
+            url = `mongodb://${db.user}:${db.password}@${db.host}:${db.port}/${db.name}`;
+        }
         mongoose
             .connect(this.config.DB_URL)
-            .then(() => console.log("MongoDB connected..."))
-            .catch((err) => console.error(err));
+            .then(() =>
+                NODE_ENV === "DEV"
+                    ? console.log("MongoDB connected...")
+                    : logger.info(`MongoDB Connected on port : ${db.port}`)
+            )
+            .catch((err) =>
+                NODE_ENV === "DEV"
+                    ? console.error(err)
+                    : logger.error(err.message, err)
+            );
     }
     main() {
-        this.app.listen(this.config.PORT, () => {
-            console.log(
-                "Bangla Web Magazine is Alive On " + process.env.BASE_URL
-            );
+        this.app.listen(port, () => {
+            if (NODE_ENV === "DEV") {
+                console.log(`Bangla Web Magazine is alive on port: ${port}...`);
+                console.log(`Environment: ${NODE_ENV}`);
+            } else {
+                logger.info(`Bangla Web Magazine is alive on port: ${port}...`);
+                logger.info(`Environment: ${NODE_ENV} mode`);
+            }
         });
     }
 }
