@@ -3,7 +3,7 @@ import {
     ConflictException,
     NotFoundException,
     UnauthorizedException,
-} from "../exceptions/http.exception";
+} from "../exceptions/http.exception.js";
 import logger from "../service/logger.service.js";
 
 export class UserController {

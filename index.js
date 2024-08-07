@@ -58,7 +58,7 @@ class App {
             url = `mongodb://${db.user}:${db.password}@${db.host}:${db.port}/${db.name}`;
         }
         mongoose
-            .connect(this.config.DB_URL)
+            .connect(url)
             .then(() =>
                 NODE_ENV === "DEV"
                     ? console.log("MongoDB connected...")

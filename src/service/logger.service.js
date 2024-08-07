@@ -1,4 +1,5 @@
 import { createLogger, format, transports } from "winston";
+import "winston-daily-rotate-file";
 import fs from "fs";
 import path from "path";
 
@@ -19,7 +20,7 @@ class LoggerService {
 
     createLogger() {
         const logFormat = printf(({ level, message, timestamp, stack }) => {
-            return `${timestamp} ${level}: ${stack || message}`;
+            return `[${timestamp}] [${level}]: ${stack || message}`;
         });
 
         return createLogger({
@@ -36,7 +37,7 @@ class LoggerService {
                     level: "error",
                 }),
                 new transports.DailyRotateFile({
-                    dirname: logDir,
+                    dirname: this.logDir,
                     filename: "application-%DATE%.log",
                     datePattern: "YYYY-MM-DD",
                     maxSize: "20m",
@@ -45,7 +46,7 @@ class LoggerService {
 
                 new transports.DailyRotateFile({
                     level: "error",
-                    dirname: logDir,
+                    dirname: this.logDir,
                     filename: "error-%DATE%.log",
                     datePattern: "YYYY-MM-DD",
                     maxSize: "20m",

@@ -59,9 +59,7 @@ A brief description of what your project does.
         - JWT_SECRET=Your_JWT_Secretkey
 
     # Other Environment Variables
-        ## Check package.json scripts section
-
-            - NODE_ENV=DEV
+        - NODE_ENV=DEV
 
     ```
 
