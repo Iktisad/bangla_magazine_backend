@@ -101,3 +101,4 @@
 -   Cons: Higher cost compared to unmanaged hosting.
 
 <!-- if data is uploaded and removed does the quota get affected for removed data? -->
+
