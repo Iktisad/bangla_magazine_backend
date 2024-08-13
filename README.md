@@ -89,7 +89,7 @@ npm run start:dev
 
 ### 🤵 Users
 
--   [User API Documentation](/src/users/doc/user.http)
+-   [User API Documentation](/doc/routes/user.http)
 
 ### 📰 Magazine
 

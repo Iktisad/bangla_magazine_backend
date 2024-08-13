@@ -25,9 +25,9 @@ export class UserController {
 
             let user = null;
             if (username) {
-                user = await this.userService.getUserByUsername(username);
+                user = await this.userService.checkUserByUsername(username);
             } else if (email) {
-                user = await this.userService.getUserByEmail(email);
+                user = await this.userService.checkUserByEmail(email);
             }
 
             if (user) {

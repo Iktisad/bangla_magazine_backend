@@ -49,11 +49,11 @@ export class UserService {
         await user.save();
         return user;
     }
-    async getUserByUsername(username) {
+    async checkUserByUsername(username) {
         return User.exists({ username });
     }
 
-    async getUserByEmail(email) {
+    async checkUserByEmail(email) {
         return User.exists({ email });
     }
     async authenticateUser(email, password) {
