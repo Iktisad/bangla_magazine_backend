@@ -4,13 +4,13 @@ A backend service for managing the diverse content of the Bangla Web Magazine, i
 
 ## 📚 Table of Contents
 
--   [Installation](#installation)
--   [Usage](#usage)
--   [Route Document](#route-document)
--   [Features](#features)
--   [Contributing](#contributing)
--   [License](#license)
--   [Contact](#contact)
+-   [⚙️ Installation](#⚙️-installation)
+-   [🚀 Usage](#🚀-usage)
+-   [📜 Route Document](#📜-route-document)
+-   [✨ Features](#✨-features)
+-   [🤝 Contributing](#🤝-contributing)
+-   [📄 License](#📄-license)
+-   [📬 Contact](#📬-contact)
 
 ## ⚙️ Installation
 
@@ -88,6 +88,7 @@ npm run start:dev
 ### 🤵 Users
 
 -   [User API Documentation](/doc/routes/user.http)
+-   [User Progress KANBAN](/doc/kanban/user.todo.md)
 
 ### 📰 Magazine
 
@@ -128,7 +129,7 @@ We welcome contributions! To get started:
     ```
 6. **Open a Pull Request.**
 
-## 📜 License
+## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) file for details.
 
