@@ -1,5 +1,3 @@
-Of course! Let's add some more visual elements, improve the structure, and make it even more appealing.
-
 # 🌟 Bangla Web Magazine Backend 🌟
 
 A backend service for managing the diverse content of the Bangla Web Magazine, including articles, artwork, photography, and podcasts. Built with Node.js and Express.js, this application uses REST APIs to provide a reliable and scalable solution for content management.
