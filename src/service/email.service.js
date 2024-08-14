@@ -1,19 +1,17 @@
-import "dotenv";
 import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-dotenv.config();
+import { mailer } from "../../config/config";
 
 export class EmailService {
     constructor() {
         this.transporter = nodemailer.createTransport({
-            host: "smtp.mail.yahoo.com",
-            service: "Yahoo",
-            port: 465,
-            secure: false,
-            logger: true,
+            host: mailer.host,
+            service: mailer.service,
+            port: mailer.port,
+            secure: mailer.secure,
+            logger: mailer.logger,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
+                user: mailer.email,
+                pass: mailer.password,
             },
         });
     }

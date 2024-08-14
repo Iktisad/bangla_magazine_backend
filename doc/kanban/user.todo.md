@@ -6,15 +6,13 @@
 -   🔴 Get a new verification link if the old link expires.
 -   🔴 Handle and throw email service errors.
 
-## 🔃 In Progress
+## 🔄 In Progress
 
--   🔵 Test environment setup
 -   🔵 **Password Reset:**
 
     -   🟦 **1.** Password change via reset link.
     -   🟦 **2.** Password change via account settings.
 
--   🔵 Implement index in the user model for faster search query.
 -   🔵 Github secrets setup
 
 ## ⚠️ Warnings
@@ -23,17 +21,20 @@
 
 ## ✅ Done
 
--   🟢 Implement a search user functionality by firstname, lastname, username, or email.\
--   🟢 Fix DOB format in the user model.\
--   🟢 Implement express validator.\
--   🟢 Generate verification token.\
--   🟢 Send verification email.\
--   🟢 Create a test email or use a less secure email to test the verification links.\
--   🟢 Check user exists function implemented as API.\
--   🟢 Verify email.\
--   🟢 Profile picture upload and location storage implemented.\
--   🟢 Check for token expiry during validation of token.\
+-   🟢 Implement a search user functionality by firstname, lastname, username, or email.
+-   🟢 Fix DOB format in the user model.
+-   🟢 Implement express validator.
+-   🟢 Generate verification token.
+-   🟢 Send verification email.
+-   🟢 Create a test email or use a less secure email to test the verification links.
+-   🟢 Check user exists function implemented as API.
+-   🟢 Verify email.
+-   🟢 Profile picture upload and location storage implemented.
+-   🟢 Check for token expiry during validation of token.
 -   🟢 Implemented logger.
+-   🟢 Test environment setup
+-   🟢 Refactor email service and import from config file
+-   🟢 Implement index in the user model for faster search query.
 
 # ❓ Questions
 

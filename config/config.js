@@ -18,7 +18,7 @@ args.forEach((arg) => {
 });
 
 process.env.NODE_ENV = argMap["env"];
-export const NODE_ENV = process.env.NODE_ENV;
+export const NODE_ENV = process.env.NODE_ENV || "TEST";
 
 // Determine the appropriate .env file based on NODE_ENV
 let envFilePath = "";
@@ -35,18 +35,30 @@ if (existsSync(envFilePath)) {
     dotenv.config();
 }
 
-// Export the environment variables
+//** Application PORT
 export const port = process.env.PORT || 3000;
-//check node env to load the appropriate variables
 
+// ** DB Configurations
 export const db = {
     name: process.env.DB_NAME,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    user: NODE_ENV === "DEV" ? "" : process.env.DB_USER,
-    password: NODE_ENV === "DEV" ? "" : process.env.DB_PASS,
+    user: NODE_ENV === "TEST" ? "" : process.env.DB_USER,
+    password: NODE_ENV === "TEST" ? "" : process.env.DB_PASS,
 };
+// ** JWT configurations
 export const jwt_var = {
     secret: process.env.JWT_SECRET,
     expiration: process.env.JWT_EXPIRATION,
+};
+
+// ** Nodemailer Configurations
+export const mailer = {
+    email: process.env.MAILER_EMAIL || "testuser@test.com",
+    password: process.env.MAILER_PASSWORD || "securetest",
+    host: process.env.MAILER_HOST || "smtp.example.com",
+    port: process.env.MAILER_PORT || 587,
+    service: process.env.MAILER_SERVICE,
+    secure: process.env.MAILER_SECURE === "true", // Convert to boolean
+    logger: process.env.MAILER_LOGGER === "true", // Convert to boolean
 };
