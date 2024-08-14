@@ -23,7 +23,7 @@ export const NODE_ENV = process.env.NODE_ENV || "TEST";
 // Determine the appropriate .env file based on NODE_ENV
 let envFilePath = "";
 if (NODE_ENV === "DEV") {
-    envFilePath = path.resolve(dirname, ".env.development.local");
+    envFilePath = path.resolve(dirname, "../.env.development.local");
 }
 
 // Load environment variables from the appropriate file
@@ -36,6 +36,7 @@ if (existsSync(envFilePath)) {
 }
 
 //** Application PORT
+
 export const port = process.env.PORT || 3000;
 
 // ** DB Configurations

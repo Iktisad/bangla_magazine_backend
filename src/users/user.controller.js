@@ -13,7 +13,7 @@ export class UserController {
         this.photoService = PhotoService;
     }
     // User exists
-    async checkUserExists(req, res) {
+    async checkUserExists(req, res, next) {
         try {
             const { username, email } = req.query;
 
@@ -46,7 +46,7 @@ export class UserController {
         }
     }
     // User signup
-    async signup(req, res) {
+    async signup(req, res, next) {
         try {
             const user = await this.userService.createUser(req.body);
 
@@ -70,7 +70,7 @@ export class UserController {
     }
 
     // User login
-    async login(req, res) {
+    async login(req, res, next) {
         try {
             const { email, password } = req.body;
             const token = await this.userService.authenticateUser(
@@ -90,7 +90,7 @@ export class UserController {
         }
     }
 
-    async verifyEmail(req, res) {
+    async verifyEmail(req, res, next) {
         try {
             const { token } = req.query;
             await this.userService.verifyUser(token);
@@ -108,7 +108,7 @@ export class UserController {
         }
     }
     //? Needs to be tested and error needs to be handled
-    async resendVerificationEmail(req, res) {
+    async resendVerificationEmail(req, res, next) {
         try {
             const { email } = req.body;
 
@@ -123,11 +123,11 @@ export class UserController {
             });
         } catch (error) {
             logger.warn(error.message);
-            res.status(400).json({ message: error.message });
+            next(error);
         }
     }
     // Fetch user details
-    async getProfile(req, res) {
+    async getProfile(req, res, next) {
         try {
             const user = await this.userService.getUserById(req.user.id);
             return res.status(200).json(user);
@@ -150,7 +150,7 @@ export class UserController {
     }
 
     // Update user profile
-    async updateUser(req, res) {
+    async updateUser(req, res, next) {
         try {
             const user = await this.userService.updateUser(req.user.id, req);
             res.status(200).json(user);
@@ -173,7 +173,7 @@ export class UserController {
     }
 
     // Fetch all users (admin only)
-    async getAllUser(req, res) {
+    async getAllUser(req, res, next) {
         try {
             const users = await this.userService.getAllUsers(req);
             return res.status(200).json(users);
@@ -183,7 +183,7 @@ export class UserController {
         }
     }
     // ? needs more testing and error handling
-    async uploadUserProfilePhoto(req, res) {
+    async uploadUserProfilePhoto(req, res, next) {
         try {
             const photoUrl = this.photoService.localPhotoUpload(req.file);
             const user = await this.userService.updateUser(req.user.id, {
@@ -198,6 +198,52 @@ export class UserController {
                 message: "Photo uploaded successfully",
                 user,
             });
+        } catch (error) {
+            logger.error(error.message);
+            next(error);
+        }
+    }
+    async requestPasswordReset(req, res, next) {
+        try {
+            const { email } = req.body;
+            const resetToken = await this.userService.requestPasswordReset({
+                email,
+            });
+            await this.emailService.sendPasswordResetEmail(email, resetToken);
+            return res
+                .status(200)
+                .send(`Password reset email sent successfully at ${email}`);
+        } catch (error) {
+            logger.error(error.message);
+            next(error);
+        }
+    }
+
+    async changePassword(req, res, next) {
+        try {
+            const { currentPassword, newPassword } = req.body;
+            await this.userService.resetPassword({
+                userId: req.user.id,
+                currentPassword,
+                newPassword,
+            });
+
+            return res.status(201).send("Password changed successfully");
+        } catch (error) {
+            logger.error(error.message);
+            next(error);
+        }
+    }
+
+    // Reset password using the token sent via email
+    async changePasswordViaEmail(req, res, next) {
+        try {
+            const { token, newPassword } = req.body;
+            await this.userService.resetPassword({
+                token,
+                newPassword,
+            });
+            return res.status(200).send("Password has been reset successfully");
         } catch (error) {
             logger.error(error.message);
             next(error);

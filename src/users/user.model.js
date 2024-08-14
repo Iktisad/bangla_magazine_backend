@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema(
         },
         isActive: { type: Boolean, default: false },
         verificationToken: { type: String, default: null },
+        resetPasswordToken: { type: String, default: null },
     },
     { timestamps: true }
 );

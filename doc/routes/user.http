@@ -1,6 +1,6 @@
 @api=http://localhost:3000/api/users
 @token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YThjOWRiYTAyZGI2MjlhNTE2NGFiMCIsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoiUHVua0hhemFyZDA5NSIsImlhdCI6MTcyMjc5MzU1MSwiZXhwIjoxNzIyODA3OTUxfQ.bmmPV5PCdkz_GI7VUpIGmVD6rhKMq1gcVF1D2JX7wEk
-
+@reset_token=adjklj
 ###-------------Login User------------###
 ###----->
 POST {{api}}/login
@@ -87,15 +87,44 @@ Authorization: Bearer {{token}}
 
 # ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 ### Upload User Profile Photo
-POST {{api}}/me/photo
-Content-Type: multipart/form-data boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-Authorization: Bearer {{token}}
+# POST {{api}}/me/photo
+# Content-Type: multipart/form-data boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+# Authorization: Bearer {{token}}
 
-----WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="photo"; filename="profile.jpg"
-Content-Type: image/jpeg
+# ----WebKitFormBoundary7MA4YWxkTrZu0gW
+# Content-Disposition: form-data; name="photo"; filename="profile.jpg"
+# Content-Type: image/jpeg
 
-< ../../../sample/profile.jpg
-----WebKitFormBoundary7MA4YWxkTrZu0gW--
+# < ../../../sample/profile.jpg
+# ----WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ###-----------------------------------###
+
+### request to change password via email
+###----Reset Password Request---------###
+
+POST {{api}}/request-reset-password
+Content-Type: application/json
+
+{
+  "email": "iktisad.rashid@gmail.com"
+}
+
+###-----------------------------------###
+
+### change passward via email link
+###-----------Reset Password----------###
+POST {{api}}/reset-password?toke={{reset_token}}
+
+###-----------------------------------###
+
+### Change password from profile or account settings
+
+POST {{api}}/change-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "currentPassword":"securepassword123",
+  "newPassword": "newsecurepassword123"
+}

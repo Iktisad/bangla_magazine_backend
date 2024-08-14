@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "start:dev": "nodemon index.js --PORT=3000 --env=DEV",
+    "start:dev": "nodemon index.js --env=DEV",
     "test": "jest"
   },
   "keywords": [

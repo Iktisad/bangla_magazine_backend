@@ -22,7 +22,7 @@ export class UserService {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const verificationToken = this.generateVerificationToken(email);
+        const verificationToken = this.generateToken(email);
 
         const user = new User({
             username,
@@ -138,13 +138,64 @@ export class UserService {
         }
 
         // Generate a new verification token
-        const verificationToken = this.generateVerificationToken(email);
+        const verificationToken = this.generateToken(email);
         user.verificationToken = verificationToken;
         await user.save();
 
         return user;
     }
-    generateVerificationToken(email) {
+    async resetPassword({ userId, currentPassword, newPassword }) {
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            throw new BadRequestException("Current password is incorrect");
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        return user;
+    }
+    // Request password reset via email
+    async requestPasswordReset({ email }) {
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new NotFoundException("User with this email does not exist");
+        }
+
+        const resetToken = this.generateToken(email);
+        user.resetPasswordToken = resetToken;
+        await user.save();
+
+        return resetToken;
+    }
+    // Reset password using the token sent via email
+    async resetPasswordViaEmail({ token, newPassword }) {
+        let decoded;
+        try {
+            decoded = jwt.verify(token, jwt_var.secret);
+        } catch (err) {
+            throw new BadRequestException(
+                "Password reset token is invalid or has expired"
+            );
+        }
+
+        const user = await User.findOne({ email: decoded.email });
+        if (!user) {
+            throw new NotFoundException("User not found");
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        user.resetPasswordToken = null; // Clear the reset token after successful password reset
+        await user.save();
+
+        return user;
+    }
+    generateToken(email) {
         // Generate verification token
         const randomToken = crypto.randomBytes(32).toString("hex");
         return jwt.sign({ email }, randomToken, { expiresIn: "1d" });

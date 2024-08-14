@@ -19,28 +19,41 @@ export default (userController) => {
     );
 
     // Fetch User profile
-    router.get("/me", verifyToken, (req, res) =>
-        userController.getProfile(req, res)
+    router.get("/me", verifyToken, (req, res, next) =>
+        userController.getProfile(req, res, next)
     );
 
     // Verify Email
-    router.get("/verify-email", (req, res) =>
-        userController.verifyEmail(req, res)
+    router.get("/verify-email", (req, res, next) =>
+        userController.verifyEmail(req, res, next)
     );
 
     // Update User Profile
-    router.put("/me", verifyToken, (req, res) =>
-        userController.updateUser(req, res)
+    router.put("/me", verifyToken, (req, res, next) =>
+        userController.updateUser(req, res, next)
     );
+    // Request password reset via email
+    router.post("/request-password-reset", (req, res, next) => {
+        userController.requestPasswordReset(req, res, next);
+    });
 
+    // Reset password via token (from email link)
+    router.post("/reset-password", (req, res, next) => {
+        userController.resetPassword(req, res, next);
+    });
+
+    // Change password via account settings (authenticated)
+    router.post("/change-password", verifyToken, (req, res, next) => {
+        userController.changePassword(req, res, next);
+    });
     // Search and Fetch User (Admin Only)
-    router.get("/", verifyToken, authorizeRoles("admin"), (req, res) =>
-        userController.getAllUser(req, res)
+    router.get("/", verifyToken, authorizeRoles("admin"), (req, res, next) =>
+        userController.getAllUser(req, res, next)
     );
 
     // Resend verification email
-    router.post("/resend-verification-email", (req, res) =>
-        userController.resendVerificationEmail(req, res)
+    router.post("/resend-verification-email", (req, res, next) =>
+        userController.resendVerificationEmail(req, res, next)
     );
 
     // Upload User Profile Photo
@@ -48,7 +61,8 @@ export default (userController) => {
         "/me/photo",
         verifyToken,
         userController.photoService.uploadSingle(),
-        (req, res) => userController.uploadUserProfilePhoto(req, res)
+        (req, res, next) =>
+            userController.uploadUserProfilePhoto(req, res, next)
     );
 
     return router;
