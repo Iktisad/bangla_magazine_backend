@@ -4,7 +4,7 @@ A backend service for managing the diverse content of the Bangla Web Magazine, i
 
 ## 📚 Table of Contents
 
--   [⚙️ Installation](#installation)
+-   [⚙️ Installation](#⚙️-installation)
 -   [🚀 Usage](#🚀-usage)
 -   [📜 Route Document](#📜-route-document)
 -   [✨ Features](#✨-features)
