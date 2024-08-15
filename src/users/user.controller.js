@@ -64,6 +64,14 @@ export class UserController {
                     .status(error.statusCode)
                     .json({ message: error.message });
             }
+            if (error.name === "TokenExpiredError") {
+                logger.warn(error.message);
+                return res
+                    .status(401)
+                    .send(
+                        "Token Expired!! Please request to resend verification email."
+                    );
+            }
             logger.error(error.message);
             next(error);
         }
@@ -239,7 +247,7 @@ export class UserController {
     async changePasswordViaEmail(req, res, next) {
         try {
             const { token, newPassword } = req.body;
-            await this.userService.resetPassword({
+            await this.userService.resetPasswordViaEmail({
                 token,
                 newPassword,
             });

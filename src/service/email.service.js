@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { mailer } from "../../config/config.js";
+import { app_con, mailer } from "../../config/config.js";
 
 export class EmailService {
     constructor() {
@@ -23,13 +23,14 @@ export class EmailService {
             subject: "Email Verification",
             html: `<p>Hello ${user.profile.firstName},</p>
              <p>Please verify your email by clicking the link below:</p>
-             <a href="${process.env.BASE_URL}/api/users/verify-email?token=${user.verificationToken}">Verify Email</a>`,
+             <a href="${app_con.host}:${app_con.port}/api/users/verify-email?token=${user.verificationToken}">Verify Email</a>`,
         };
 
         await this.transporter.sendMail(mailOptions);
     }
+    // TODO need to set a frontend url for reset form
     async sendPasswordResetEmail(email, resetToken) {
-        const resetUrl = `${process.env.BASE_URL}/reset-password?token=${resetToken}`;
+        const resetUrl = `${app_con.host}:${app_con.port}/reset-password?token=${resetToken}`;
         const mailOptions = {
             from: mailer.email,
             to: email,

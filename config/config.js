@@ -36,8 +36,10 @@ if (existsSync(envFilePath)) {
 }
 
 //** Application PORT
-
-export const port = process.env.PORT || 3000;
+export const app_con = {
+    port: process.env.PORT || 3000,
+    host: process.env.APP_HOST,
+};
 
 // ** DB Configurations
 export const db = {

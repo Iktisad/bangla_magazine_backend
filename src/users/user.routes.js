@@ -29,7 +29,7 @@ export default (userController) => {
     );
 
     // Update User Profile
-    router.put("/me", verifyToken, (req, res, next) =>
+    router.patch("/me", verifyToken, (req, res, next) =>
         userController.updateUser(req, res, next)
     );
     // Request password reset via email
@@ -39,7 +39,7 @@ export default (userController) => {
 
     // Reset password via token (from email link)
     router.post("/reset-password", (req, res, next) => {
-        userController.resetPassword(req, res, next);
+        userController.changePasswordViaEmail(req, res, next);
     });
 
     // Change password via account settings (authenticated)

@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import { User } from "./user.model.js";
 import {
     BadRequestException,
@@ -9,13 +8,14 @@ import {
     UnauthorizedException,
 } from "../exceptions/http.exception.js";
 import { jwt_var } from "../../config/config.js";
+import { deepMerge } from "../utils/helper.js";
 
 export class UserService {
     async createUser(body) {
-        const { username, email, password, unSanitizedEmail, profile } = body;
+        const { username, email, password, profile } = body;
 
         const existingUser = await User.exists({
-            $or: [{ username }, { email: unSanitizedEmail }],
+            $or: [{ username }, { email }],
         });
         if (existingUser) {
             throw new ConflictException("Username or email already exists");
@@ -26,7 +26,7 @@ export class UserService {
 
         const user = new User({
             username,
-            email: unSanitizedEmail,
+            email,
             password: hashedPassword,
             profile,
             verificationToken,
@@ -38,7 +38,7 @@ export class UserService {
     }
 
     async verifyUser(token) {
-        jwt.verify(token, jwt_var.secret || "lameSecret");
+        jwt.verify(token, jwt_var.secret);
         const user = await User.findOne({ verificationToken: token });
         if (!user) {
             throw new UnauthorizedException("Invalid verification token");
@@ -102,13 +102,25 @@ export class UserService {
         if (!userId) {
             throw new BadRequestException("User ID is required");
         }
+        // Ensure the body is not empty
+        if (Object.keys(body).length === 0) {
+            throw new BadRequestException("No fields provided for update");
+        }
 
-        const user = await User.findByIdAndUpdate(userId, body, {
-            new: true,
-        }).select("-password -verificationToken");
+        // Find the user by ID
+        const user = await User.findById(userId).select(
+            "-password -verificationToken"
+        );
+
         if (!user) {
             throw new NotFoundException("User not found");
         }
+
+        // Apply the custom deep merge to update only the specified fields
+        deepMerge(user, body);
+
+        // Save the updated user document, triggering Mongoose validation
+        await user.save();
 
         return user;
     }
@@ -133,7 +145,7 @@ export class UserService {
             throw new Error("User not found");
         }
 
-        if (user.isVerified) {
+        if (user.isActive) {
             throw new Error("Email is already verified");
         }
 
@@ -175,15 +187,9 @@ export class UserService {
     }
     // Reset password using the token sent via email
     async resetPasswordViaEmail({ token, newPassword }) {
-        let decoded;
-        try {
-            decoded = jwt.verify(token, jwt_var.secret);
-        } catch (err) {
-            throw new BadRequestException(
-                "Password reset token is invalid or has expired"
-            );
-        }
-
+        console.log("Inside reset password email");
+        const decoded = jwt.verify(token, jwt_var.secret);
+        console.log(decoded);
         const user = await User.findOne({ email: decoded.email });
         if (!user) {
             throw new NotFoundException("User not found");
@@ -197,7 +203,6 @@ export class UserService {
     }
     generateToken(email) {
         // Generate verification token
-        const randomToken = crypto.randomBytes(32).toString("hex");
-        return jwt.sign({ email }, randomToken, { expiresIn: "1d" });
+        return jwt.sign({ email }, jwt_var.secret, { expiresIn: "1d" });
     }
 }

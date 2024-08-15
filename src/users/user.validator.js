@@ -12,12 +12,8 @@ export const validateSignup = [
     check("email")
         .notEmpty()
         .isEmail()
-        .withMessage("Please provide a valid email address")
-        .customSanitizer((value, { req }) => {
-            req.body.unSanitizedEmail = value;
-            return value;
-        })
-        .normalizeEmail(),
+        .withMessage("Please provide a valid email address"),
+
     check("password")
         .notEmpty()
         .withMessage("Password is required")

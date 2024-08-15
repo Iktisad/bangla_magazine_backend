@@ -3,16 +3,12 @@
 ## 📝 Todo
 
 -   🔴 When a new account is created or during login, if the token is valid, the email must be verified, or a resend option should be provided. If the token has expired, a new token should automatically be generated and sent to the email during the login process.
--   🔴 Get a new verification link if the old link expires.
--   🔴 Handle and throw email service errors.
+-   🔴 Need to setup a frontend form for password reset in email service.
 
 ## 🔄 In Progress
 
--   🔵 **Password Reset:**
-
-    -   🟦 **1.** Password change via reset link.
-    -   🟦 **2.** Password change via account settings.
-
+-   🔵 Get a new verification link if the old link expires.
+-   🔵 Handle and throw email service errors.
 -   🔵 Github secrets setup
 
 ## ⚠️ Warnings
@@ -35,6 +31,12 @@
 -   🟢 Test environment setup
 -   🟢 Refactor email service and import from config file
 -   🟢 Implement index in the user model for faster search query.
+-   🟢 **Password Reset:**
+
+    -   🟩 **1.** Password change via reset link.
+    -   🟩 **2.** Password change via account settings.
+
+-   🟢 remove unsatized email from user.validator and user.service
 
 # ❓ Questions
 

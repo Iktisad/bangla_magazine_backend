@@ -1,6 +1,20 @@
-@api=http://localhost:3000/api/users
-@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YThjOWRiYTAyZGI2MjlhNTE2NGFiMCIsInJvbGUiOiJhZG1pbiIsInVzZXJuYW1lIjoiUHVua0hhemFyZDA5NSIsImlhdCI6MTcyMjc5MzU1MSwiZXhwIjoxNzIyODA3OTUxfQ.bmmPV5PCdkz_GI7VUpIGmVD6rhKMq1gcVF1D2JX7wEk
-@reset_token=adjklj
+@port=3001
+@api=http://localhost:{{port}}/api/users
+@token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YmQ5ZTljMGFjZDZmODc4NmE0YWUzZCIsInJvbGUiOiJjb250cmlidXRvciIsInVzZXJuYW1lIjoiUHVua0hhemFyZDA5NSIsImlhdCI6MTcyMzcwMzEwMCwiZXhwIjoxNzIzNzE3NTAwfQ._GWpUL7N4KLLDfTOK3W0_5gjllKqXbVa4xri6UOpKPk
+@reset_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImlrdGlzYWQucmFzaGlkQGdtYWlsLmNvbSIsImlhdCI6MTcyMzcwNzE1MiwiZXhwIjoxNzIzNzkzNTUyfQ.D8DhaqhP1Eg26l6f43lt0gQun_2nW6b_tdLbMw32D-A
+
+@test_email="iktisad.rashid@gmail.com"
+@test_password="securepassword123"
+@test_username="PunkHazard095"
+###--------Check If User Exists-------###
+### EMAIL
+###----->
+GET {{api}}/check-exists?email=iktisad.rashid@gmail.com
+### USERNAME
+###----->
+GET {{api}}/check-exists?username=PunkHazard095
+
+###-----------------------------------###
 ###-------------Login User------------###
 ###----->
 POST {{api}}/login
@@ -35,7 +49,7 @@ Content-Type: application/json
 
 ###-------------Update User------------###
 ###----->
-PUT {{api}}/me
+PATCH {{api}}/me
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -49,7 +63,9 @@ Content-Type: application/json
       "twitter": "https://twitter.com/iktisad",
       "facebook": "https://facebook.com/iktisad",
       "instagram": "https://instagram.com/iktisad"
-    }
+    },
+    "contactEmail": ["test@test.com", "bestbuy@gmail.com"]
+    
   }
 }
 
@@ -102,8 +118,8 @@ Authorization: Bearer {{token}}
 
 ### request to change password via email
 ###----Reset Password Request---------###
-
-POST {{api}}/request-reset-password
+###----->
+POST {{api}}/request-password-reset
 Content-Type: application/json
 
 {
@@ -114,17 +130,25 @@ Content-Type: application/json
 
 ### change passward via email link
 ###-----------Reset Password----------###
-POST {{api}}/reset-password?toke={{reset_token}}
+###----->
+POST {{api}}/reset-password
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImlrdGlzYWQucmFzaGlkQGdtYWlsLmNvbSIsImlhdCI6MTcyMzcwNzE1MiwiZXhwIjoxNzIzNzkzNTUyfQ.D8DhaqhP1Eg26l6f43lt0gQun_2nW6b_tdLbMw32D-A",
+  "newPassword": "newsecurepass123"
+}
+
 
 ###-----------------------------------###
 
 ### Change password from profile or account settings
-
+###----->
 POST {{api}}/change-password
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "currentPassword":"securepassword123",
-  "newPassword": "newsecurepassword123"
+  "currentPassword":"newsecurepass123",
+  "newPassword": "securepassword123"
 }

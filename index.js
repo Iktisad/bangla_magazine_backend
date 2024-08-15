@@ -5,7 +5,7 @@ import userRoutes from "./src/users/user.routes.js";
 // import articleRoutes from "./src/magazine/article/article.routes.js";
 // import categoryRoutes from "./src/magazine/category/category.routes.js";
 // import podcastRoutes from "./src/podcast/podcast.routes.js";
-import { db, port, NODE_ENV } from "./config/config.js";
+import { db, NODE_ENV, app_con } from "./config/config.js";
 import {
     errorLogger,
     requestLogger,
@@ -71,12 +71,16 @@ class App {
             );
     }
     main() {
-        this.app.listen(port, () => {
+        this.app.listen(app_con.port, () => {
             if (NODE_ENV === "DEV") {
-                console.log(`Bangla Web Magazine is alive on port: ${port}...`);
+                console.log(
+                    `Bangla Web Magazine is alive on port: ${app_con.port}...`
+                );
                 console.log(`Environment: ${NODE_ENV}`);
             } else {
-                logger.info(`Bangla Web Magazine is alive on port: ${port}...`);
+                logger.info(
+                    `Bangla Web Magazine is alive on port: ${app_con.port}...`
+                );
                 logger.info(`Environment: ${NODE_ENV} mode`);
             }
         });

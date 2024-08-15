@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
+import { jwt_var } from "../../../config/config.js";
 
 function verifyToken(req, res, next) {
     const token = req.header("Authorization").replace("Bearer ", "");
@@ -10,7 +9,7 @@ function verifyToken(req, res, next) {
     }
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, jwt_var.secret);
 
         req.user = decoded;
         next();

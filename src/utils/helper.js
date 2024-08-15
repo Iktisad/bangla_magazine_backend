@@ -19,3 +19,27 @@ export function removeKeys(obj, keysToRemove) {
 
     return removeKeysRecursive(obj);
 }
+
+export function deepMerge(target, source) {
+    for (const key in source) {
+        if (source.hasOwnProperty(key)) {
+            if (Array.isArray(source[key])) {
+                // Replace arrays completely
+                target[key] = source[key];
+            } else if (
+                source[key] !== null &&
+                typeof source[key] === "object"
+            ) {
+                // If the target does not have this key, initialize it as an object
+                if (!target[key] || typeof target[key] !== "object") {
+                    target[key] = {};
+                }
+                // Recursively merge nested objects
+                deepMerge(target[key], source[key]);
+            } else {
+                // For primitive types, directly assign the value
+                target[key] = source[key];
+            }
+        }
+    }
+}
