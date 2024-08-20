@@ -1,6 +1,6 @@
 // config/config.js
 
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import logger from "../src/service/logger.service.js";
@@ -17,19 +17,33 @@ args.forEach((arg) => {
     argMap[key.replace("--", "")] = value;
 });
 
-process.env.NODE_ENV = argMap["env"];
-export const NODE_ENV = process.env.NODE_ENV || "TEST";
+process.env.NODE_ENV = argMap["env"] || "TEST";
+export const NODE_ENV = process.env.NODE_ENV;
 
 // Determine the appropriate .env file based on NODE_ENV
 let envFilePath = "";
-if (NODE_ENV === "DEV") {
+let ext = "env";
+if (NODE_ENV === "DEV")
     envFilePath = path.resolve(dirname, "../.env.development.local");
+else if (NODE_ENV === "PROD")
+    envFilePath = path.resolve(dirname, "../.env.production.local");
+else if (NODE_ENV === "TEST") {
+    envFilePath = path.resolve(dirname, "../__tests__/env.json");
+    ext = "json";
 }
-
 // Load environment variables from the appropriate file
-if (existsSync(envFilePath)) {
+if (existsSync(envFilePath) && ext === "env") {
     console.log(`Loading environment variables from ${envFilePath}`);
     dotenv.config({ path: envFilePath });
+} else if (existsSync(envFilePath) && ext === "json") {
+    logger.info(`Loading environment variables from ${envFilePath}`);
+    const rawData = readFileSync(envFilePath, "utf-8");
+    const jsonData = JSON.parse(rawData);
+
+    // Optionally, set each property in the JSON to process.env
+    for (const [key, value] of Object.entries(jsonData)) {
+        process.env[key] = value;
+    }
 } else {
     logger.info("Loading environment variables from .env");
     dotenv.config();
@@ -46,8 +60,8 @@ export const db = {
     name: process.env.DB_NAME,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    user: NODE_ENV === "TEST" ? "" : process.env.DB_USER,
-    password: NODE_ENV === "TEST" ? "" : process.env.DB_PASS,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
 };
 // ** JWT configurations
 export const jwt_var = {

@@ -21,6 +21,54 @@ describe("UserService", () => {
         jest.clearAllMocks(); // Reset mocks after each test
     });
 
+    describe("checkUserByUsername", () => {
+        it("should return true if a user with the given username exists", async () => {
+            const mockUsername = "existinguser";
+            User.exists = jest.fn().mockResolvedValue(true); // Mock User.exists to return true
+
+            const result = await userService.checkUserByUsername(mockUsername);
+
+            expect(User.exists).toHaveBeenCalledWith({
+                username: mockUsername,
+            });
+            expect(result).toBe(true);
+        });
+
+        it("should return false if no user with the given username exists", async () => {
+            const mockUsername = "nonexistentuser";
+            User.exists = jest.fn().mockResolvedValue(false); // Mock User.exists to return false
+
+            const result = await userService.checkUserByUsername(mockUsername);
+
+            expect(User.exists).toHaveBeenCalledWith({
+                username: mockUsername,
+            });
+            expect(result).toBe(false);
+        });
+    });
+
+    describe("checkUserByEmail", () => {
+        it("should return true if a user with the given email exists", async () => {
+            const mockEmail = "existinguser@example.com";
+            User.exists = jest.fn().mockResolvedValue(true); // Mock User.exists to return true
+
+            const result = await userService.checkUserByEmail(mockEmail);
+
+            expect(User.exists).toHaveBeenCalledWith({ email: mockEmail });
+            expect(result).toBe(true);
+        });
+
+        it("should return false if no user with the given email exists", async () => {
+            const mockEmail = "nonexistentuser@example.com";
+            User.exists = jest.fn().mockResolvedValue(false); // Mock User.exists to return false
+
+            const result = await userService.checkUserByEmail(mockEmail);
+
+            expect(User.exists).toHaveBeenCalledWith({ email: mockEmail });
+            expect(result).toBe(false);
+        });
+    });
+
     describe("createUser", () => {
         it("should create a new user and return it", async () => {
             // Mock User.exists to return false (indicating no user exists)
@@ -235,12 +283,13 @@ describe("UserService", () => {
 
         it("should throw NotFoundException if user not found", async () => {
             // Mocking the findById method to return null
+            const mockId = new mongoose.Types.ObjectId().toString();
             jest.spyOn(User, "findById").mockReturnValue({
                 select: jest.fn().mockResolvedValue(null),
             });
 
             await expect(
-                userService.getUserById("nonexistentId")
+                userService.getUserById(mockId)
             ).rejects.toBeInstanceOf(NotFoundException);
         });
     });
@@ -248,49 +297,72 @@ describe("UserService", () => {
     describe("updateUser", () => {
         it("should update and return a user by ID", async () => {
             const mockUser = {
-                _id: "userId",
-                username: "updateduser",
+                _id: new mongoose.Types.ObjectId().toString(),
+                username: "existinguser",
                 email: "test@test.com",
                 profile: {
-                    firstName: "Updated",
+                    firstName: "Existing",
                     lastName: "User",
+                    socialLinks: {
+                        linkedin: "https://linkedin.com/in/existing",
+                        twitter: "https://twitter.com/existing",
+                    },
+                    contactEmail: ["existing@test.com"],
+                },
+                save: jest.fn().mockResolvedValue(true), // Mock the save method to simulate a successful save
+            };
+
+            const updatedData = {
+                username: "updateduser",
+                profile: {
+                    firstName: "Updated",
+                    socialLinks: {
+                        linkedin: "https://linkedin.com/in/updated",
+                        twitter: "https://twitter.com/updated",
+                    },
+                    contactEmail: ["test@test.com", "newemail@gmail.com"],
                 },
             };
 
-            // Mock User.findByIdAndUpdate to return the updated user
-            jest.spyOn(User, "findByIdAndUpdate").mockReturnValue({
+            User.findById.mockReturnValue({
                 select: jest.fn().mockResolvedValue(mockUser),
             });
 
-            const updatedUser = await userService.updateUser("userId", {
-                body: {
-                    username: "updateduser",
-                    profile: {
-                        firstName: "Updated",
-                        lastName: "User",
-                    },
-                },
+            const updatedUser = await userService.updateUser(mockUser._id, {
+                body: updatedData,
             });
 
             expect(updatedUser.username).toBe("updateduser");
             expect(updatedUser.profile.firstName).toBe("Updated");
+            expect(updatedUser.profile.socialLinks.linkedin).toBe(
+                "https://linkedin.com/in/updated"
+            );
+            expect(mockUser.save).toHaveBeenCalled(); // Ensure save was called
         });
 
         it("should throw NotFoundException if user not found", async () => {
-            // Mock User.findByIdAndUpdate to return null
-            jest.spyOn(User, "findByIdAndUpdate").mockReturnValue({
+            const mockId = new mongoose.Types.ObjectId().toString();
+
+            User.findById.mockReturnValue({
                 select: jest.fn().mockResolvedValue(null),
             });
 
             await expect(
-                userService.updateUser("nonexistentId", { body: {} })
+                userService.updateUser(mockId, { body: { username: "Punks" } })
             ).rejects.toBeInstanceOf(NotFoundException);
         });
 
         it("should throw BadRequestException if ID is not present", async () => {
-            // This test doesn't need to mock User.findByIdAndUpdate because it should throw before making a DB call
             await expect(
-                userService.updateUser("", { body: { username: "testuser" } })
+                userService.updateUser("", { username: "testuser" })
+            ).rejects.toBeInstanceOf(BadRequestException);
+        });
+
+        it("should throw BadRequestException if body is empty", async () => {
+            const mockUserId = new mongoose.Types.ObjectId().toString();
+
+            await expect(
+                userService.updateUser(mockUserId, { body: {} })
             ).rejects.toBeInstanceOf(BadRequestException);
         });
     });
