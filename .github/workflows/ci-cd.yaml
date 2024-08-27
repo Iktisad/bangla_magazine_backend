@@ -35,7 +35,7 @@ jobs:
                   MONGOMS_SKIP_MD5: true # Skip MD5 validation to save time
                   MONGOMS_PLATFORM: linux # Ensure correct platform is used
                   MONGOMS_ARCH: x64 # Specify architecture
-                  MONGOMS_SYSTEM_BINARY: /usr/local/bin/mongod
+                  MONGOMS_DOWNLOAD_URL: https://your-internal-server.com/mongodb-linux-x86_64-ubuntu2204-5.0.6.tgz
                   MONGOMS_DEBUG: true # Enable debug logs for troubleshooting
               run: npm run test:e2e
 
