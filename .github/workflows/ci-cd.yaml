@@ -10,7 +10,7 @@ on:
 
 jobs:
     build:
-        runs-on: ubuntu-latest
+        runs-on: windows-latest
 
         steps:
             - name: Checkout code
@@ -33,9 +33,8 @@ jobs:
                   MONGOMS_SYSTEM_MEMORY: 2048 # Limit memory usage to 2GB
                   MONGOMS_DOWNLOAD_TIMEOUT: 600000 # Set a long download timeout
                   MONGOMS_SKIP_MD5: true # Skip MD5 validation to save time
-                  MONGOMS_PLATFORM: linux # Ensure correct platform is used
+                  MONGOMS_PLATFORM: win32 # Ensure correct platform is used
                   MONGOMS_ARCH: x64 # Specify architecture
-                  MONGOMS_DOWNLOAD_URL: https://your-internal-server.com/mongodb-linux-x86_64-ubuntu2204-5.0.6.tgz
                   MONGOMS_DEBUG: true # Enable debug logs for troubleshooting
               run: npm run test:e2e
 
