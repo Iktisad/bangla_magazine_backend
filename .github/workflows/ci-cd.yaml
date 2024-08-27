@@ -11,11 +11,6 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
-        services:
-            mongodb:
-                image: mongo:4.4
-                ports:
-                    - 27017:27017
 
         steps:
             - name: Checkout code
@@ -31,8 +26,13 @@ jobs:
 
             - name: Run tests
               env:
+                  MONGOMS_VERSION: 10.0.0
                   MONGOMS_SYSTEM_MEMORY: 2048 # Limit memory usage to 2GB
                   MONGOMS_DOWNLOAD_TIMEOUT: 600000 # Set a long download timeout
+                  MONGOMS_SKIP_MD5: true # Skip MD5 validation to save time
+                  MONGOMS_PLATFORM: linux # Ensure correct platform is used
+                  MONGOMS_ARCH: x64 # Specify architecture
+                  MONGOMS_DEBUG: true # Enable debug logs for troubleshooting
               run: npm test
 
     # deploy:
