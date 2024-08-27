@@ -11,6 +11,11 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        services:
+            mongodb:
+                image: mongo:4.4
+                ports:
+                    - 27017:27017
 
         steps:
             - name: Checkout code
@@ -25,6 +30,9 @@ jobs:
               run: npm install
 
             - name: Run tests
+              env:
+                  MONGOMS_SYSTEM_MEMORY: 2048 # Limit memory usage to 2GB
+                  MONGOMS_DOWNLOAD_TIMEOUT: 600000 # Set a long download timeout
               run: npm test
 
     # deploy:
