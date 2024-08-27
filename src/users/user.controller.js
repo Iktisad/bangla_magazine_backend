@@ -5,12 +5,12 @@ import {
     UnauthorizedException,
 } from "../exceptions/http.exception.js";
 import logger from "../service/logger.service.js";
+import EmailService from "../service/email.service.js";
+import PhotoService from "../service/photo.service.js";
 
 export class UserController {
-    constructor(UserService, EmailService, PhotoService) {
+    constructor(UserService) {
         this.userService = UserService;
-        this.emailService = EmailService;
-        this.photoService = PhotoService;
     }
     // User exists
     async checkUserExists(req, res, next) {
@@ -50,7 +50,7 @@ export class UserController {
         try {
             const user = await this.userService.createUser(req.body);
 
-            await this.emailService.sendVerificationEmail(user);
+            await EmailService.sendVerificationEmail(user);
             return res
                 .status(201)
                 .send(
@@ -124,7 +124,7 @@ export class UserController {
             const user = await this.userService.resetVerificationEmailToken(
                 email
             );
-            await this.emailService.sendVerificationEmail(user);
+            await EmailService.sendVerificationEmail(user);
             return res.status(200).json({
                 message: "Verification email resent successfully",
                 user,
@@ -158,7 +158,7 @@ export class UserController {
     }
 
     // Update user profile
-    async updateUser(req, res, next) {
+    async updateProfile(req, res, next) {
         try {
             const user = await this.userService.updateUser(req.user.id, req);
             res.status(200).json(user);
@@ -181,7 +181,7 @@ export class UserController {
     }
 
     // Fetch all users (admin only)
-    async getAllUser(req, res, next) {
+    async getAllProfile(req, res, next) {
         try {
             const users = await this.userService.getAllUsers(req);
             return res.status(200).json(users);
@@ -191,13 +191,13 @@ export class UserController {
         }
     }
     // ? needs more testing and error handling
-    async uploadUserProfilePhoto(req, res, next) {
+    async uploadProfilePhoto(req, res, next) {
         try {
-            const photoUrl = this.photoService.localPhotoUpload(req.file);
+            const imageUrl = await PhotoService.uploadSingleOnDisc(req, res);
             const user = await this.userService.updateUser(req.user.id, {
                 body: {
                     profile: {
-                        profilePicture: photoUrl,
+                        profilePicture: imageUrl,
                     },
                 },
             });
@@ -217,7 +217,7 @@ export class UserController {
             const resetToken = await this.userService.requestPasswordReset({
                 email,
             });
-            await this.emailService.sendPasswordResetEmail(email, resetToken);
+            await EmailService.sendPasswordResetEmail(email, resetToken);
             return res
                 .status(200)
                 .send(`Password reset email sent successfully at ${email}`);

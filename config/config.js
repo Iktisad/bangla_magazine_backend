@@ -19,8 +19,9 @@ args.forEach((arg) => {
 
 process.env.NODE_ENV = argMap["env"] || "TEST";
 export const NODE_ENV = process.env.NODE_ENV;
+logger.info(`Environment Mode: ${NODE_ENV}`);
 
-// Determine the appropriate .env file based on NODE_ENV
+// ** Determine the appropriate .env file based on NODE_ENV
 let envFilePath = "";
 let ext = "env";
 if (NODE_ENV === "DEV")
@@ -31,9 +32,9 @@ else if (NODE_ENV === "TEST") {
     envFilePath = path.resolve(dirname, "../__tests__/env.json");
     ext = "json";
 }
-// Load environment variables from the appropriate file
+// ** Load environment variables from the appropriate file
 if (existsSync(envFilePath) && ext === "env") {
-    console.log(`Loading environment variables from ${envFilePath}`);
+    logger.info(`Loading environment variables from ${envFilePath}`);
     dotenv.config({ path: envFilePath });
 } else if (existsSync(envFilePath) && ext === "json") {
     logger.info(`Loading environment variables from ${envFilePath}`);
@@ -51,18 +52,32 @@ if (existsSync(envFilePath) && ext === "env") {
 
 //** Application PORT
 export const app_con = {
-    port: process.env.PORT || 3000,
+    port: process.env.PORT,
     host: process.env.APP_HOST,
 };
 
 // ** DB Configurations
-export const db = {
+
+const db = {
     name: process.env.DB_NAME,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
 };
+
+export const db_uri = (() => {
+    switch (process.env.NODE_ENV) {
+        case "PROD":
+            return `mongodb://${db.user}:${db.password}@${db.host}:${db.port}/${db.name}`;
+        case "TEST":
+            return process.env.MONGO_TEST_URI;
+        case "DEV":
+        default:
+            return `mongodb://${db.host}:${db.port}/${db.name}`;
+    }
+})();
+
 // ** JWT configurations
 export const jwt_var = {
     secret: process.env.JWT_SECRET,
@@ -71,10 +86,10 @@ export const jwt_var = {
 
 // ** Nodemailer Configurations
 export const mailer = {
-    email: process.env.MAILER_EMAIL || "testuser@test.com",
-    password: process.env.MAILER_PASSWORD || "securetest",
-    host: process.env.MAILER_HOST || "smtp.example.com",
-    port: process.env.MAILER_PORT || 587,
+    email: process.env.MAILER_EMAIL,
+    password: process.env.MAILER_PASSWORD,
+    host: process.env.MAILER_HOST,
+    port: process.env.MAILER_PORT,
     service: process.env.MAILER_SERVICE,
     secure: process.env.MAILER_SECURE === "true", // Convert to boolean
     logger: process.env.MAILER_LOGGER === "true", // Convert to boolean

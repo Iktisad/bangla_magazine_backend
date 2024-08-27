@@ -1,9 +1,9 @@
 import nodemailer from "nodemailer";
 import { app_con, mailer } from "../../config/config.js";
 
-export class EmailService {
-    constructor() {
-        this.transporter = nodemailer.createTransport({
+export default class EmailService {
+    static getTransporter() {
+        return nodemailer.createTransport({
             host: mailer.host,
             service: mailer.service,
             port: mailer.port,
@@ -15,8 +15,7 @@ export class EmailService {
             },
         });
     }
-
-    async sendVerificationEmail(user) {
+    static async sendVerificationEmail(user) {
         const mailOptions = {
             from: mailer.email,
             to: user.email,
@@ -26,10 +25,10 @@ export class EmailService {
              <a href="${app_con.host}:${app_con.port}/api/users/verify-email?token=${user.verificationToken}">Verify Email</a>`,
         };
 
-        await this.transporter.sendMail(mailOptions);
+        await this.getTransporter().sendMail(mailOptions);
     }
     // TODO need to set a frontend url for reset form
-    async sendPasswordResetEmail(email, resetToken) {
+    static async sendPasswordResetEmail(email, resetToken) {
         const resetUrl = `${app_con.host}:${app_con.port}/reset-password?token=${resetToken}`;
         const mailOptions = {
             from: mailer.email,
@@ -40,6 +39,6 @@ export class EmailService {
                    <p>If you did not request a password reset, please ignore this email.</p>`,
         };
 
-        await this.transporter.sendMail(mailOptions);
+        await this.getTransporter().sendMail(mailOptions);
     }
 }

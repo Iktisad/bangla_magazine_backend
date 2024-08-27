@@ -1,13 +1,31 @@
-// jest.setup.js
+import App from "../src/app.js";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import mongoose from "mongoose";
+import seedUsers from "../seed/user.seed.js";
+
+let mongoServer;
+let appInstance;
 
 beforeAll(async () => {
-    // The mock connection is automatically handled
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+
+    // Override the MongoDB connection URL for testing
+
+    appInstance = new App();
+    global.app = appInstance.app;
+    await appInstance.connectToDatabase(mongoUri);
+    await seedUsers();
 });
 
 afterAll(async () => {
-    // await mongoose.connection.close(); // Close the mock connection after tests
+    // await appInstance.stop();
+    const collections = mongoose.connection.collections;
+    for (let key in collections) {
+        await collections[key].deleteMany();
+    }
+    await appInstance.disconnectDatabase();
+    await mongoServer.stop();
 });
 
-describe("This is test setup environment", () => {
-    test.todo("Will do something soon");
-});
+beforeEach(async () => {});

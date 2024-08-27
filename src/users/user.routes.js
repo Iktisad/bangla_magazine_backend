@@ -5,17 +5,17 @@ const router = express.Router();
 
 export default (userController) => {
     // check if user exists
-    router.get("/check-exists", (req, res) =>
-        userController.checkUserExists(req, res)
+    router.get("/check-exists", (req, res, next) =>
+        userController.checkUserExists(req, res, next)
     );
     // User Singup
-    router.post("/signup", validateSignup, validate, (req, res) =>
-        userController.signup(req, res)
+    router.post("/signup", validateSignup, validate, (req, res, next) =>
+        userController.signup(req, res, next)
     );
 
     // User Login
-    router.post("/login", validateLogin, validate, (req, res) =>
-        userController.login(req, res)
+    router.post("/login", validateLogin, validate, (req, res, next) =>
+        userController.login(req, res, next)
     );
 
     // Fetch User profile
@@ -30,7 +30,7 @@ export default (userController) => {
 
     // Update User Profile
     router.patch("/me", verifyToken, (req, res, next) =>
-        userController.updateUser(req, res, next)
+        userController.updateProfile(req, res, next)
     );
     // Request password reset via email
     router.post("/request-password-reset", (req, res, next) => {
@@ -48,7 +48,7 @@ export default (userController) => {
     });
     // Search and Fetch User (Admin Only)
     router.get("/", verifyToken, authorizeRoles("admin"), (req, res, next) =>
-        userController.getAllUser(req, res, next)
+        userController.getAllProfile(req, res, next)
     );
 
     // Resend verification email
@@ -57,12 +57,8 @@ export default (userController) => {
     );
 
     // Upload User Profile Photo
-    router.post(
-        "/me/photo",
-        verifyToken,
-        userController.photoService.uploadSingle(),
-        (req, res, next) =>
-            userController.uploadUserProfilePhoto(req, res, next)
+    router.post("/me/photo", verifyToken, (req, res, next) =>
+        userController.uploadProfilePhoto(req, res, next)
     );
 
     return router;

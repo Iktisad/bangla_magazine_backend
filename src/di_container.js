@@ -1,7 +1,5 @@
 import { UserService } from "./users/user.service.js";
 import { UserController } from "./users/user.controller.js";
-import { EmailService } from "./service/email.service.js";
-import { PhotoService } from "./service/photo.service.js";
 // import { ArticleService } from "./magazine/article/article.service.js";
 // import { ArticleController } from "./magazine/article/article.controller.js";
 // import { CategoryController } from "./magazine/category/category.controller.js";
@@ -20,8 +18,6 @@ class DIContainer {
     }
 
     initServices() {
-        this.services.emailService = new EmailService();
-        this.services.photoService = new PhotoService();
         this.services.userService = new UserService();
         // this.services.articleService = new ArticleService();
         // this.services.categoryService = new CategoryService();

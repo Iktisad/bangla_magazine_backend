@@ -1,19 +1,8 @@
-// import AWS from "aws-sdk";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
-import dotenv from "dotenv";
 import { BadRequestException } from "../exceptions/http.exception.js";
 import path from "path";
 import fs from "fs";
-
-dotenv.config();
-
-// const s3 = new AWS.S3({
-//     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-//     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-//     region: process.env.AWS_REGION,
-// });
-// const storage = multer.memoryStorage();
 
 const uploadsDir = "uploads";
 
@@ -56,26 +45,25 @@ const upload = multer({
     },
 });
 
-export class PhotoService {
-    uploadSingle() {
-        return upload.single("photo");
-    }
+export default class PhotoService {
+    static uploadSingleOnDisc(req, res) {
+        return new Promise((resolve, reject) => {
+            upload.single("photo")(req, res, (err) => {
+                if (err) {
+                    return reject(err);
+                }
 
-    // async uploadPhoto(file) {
-    // const fileName = `${uuidv4()}-${file.originalname}`;
-    // const params = {
-    //     Bucket: process.env.AWS_BUCKET_NAME,
-    //     Key: fileName,
-    //     Body: file.buffer,
-    //     ContentType: file.mimetype,
-    //     ACL: "public-read",
-    // };
-
-    // const data = await s3.upload(params).promise();
-    // return data.Location;
-    // return `../../uploads/${fileName}`;
-    // }
-    localPhotoUpload(file) {
-        return `${uploadsDir}/${file.filename}`;
+                if (req.file) {
+                    const imageUrl = `${uploadsDir}/${req.file.filename}`;
+                    resolve(imageUrl);
+                } else {
+                    reject(
+                        new BadRequestException(
+                            "No file uploaded or invalid file type."
+                        )
+                    );
+                }
+            });
+        });
     }
 }
