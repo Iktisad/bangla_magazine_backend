@@ -9,7 +9,7 @@
     "start:dev": "nodemon index.js --env=DEV",
     "test": "jest --detectOpenHandles --forceExit",
     "test:unit":"jest --selectProjects unit --runInBand",
-    "test:e2e":"jest --selectProjects integration",
+    "test:e2e":"jest --selectProjects integration --runInBand --detectOpenHandles --forceExit",
     "test:tdd":"jest"
   },
   "keywords": [
