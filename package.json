@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node index.js",
     "start:dev": "nodemon index.js --env=DEV",
-    "test": "jest --runInBand --detectOpenHandles --forceExit"
+    "test": "jest --detectOpenHandles --forceExit",
+    "test:unit":"jest --selectProjects unit --runInBand",
+    "test:e2e":"jest --selectProjects integration",
+    "test:tdd":"jest"
   },
   "keywords": [
     "Bangla",

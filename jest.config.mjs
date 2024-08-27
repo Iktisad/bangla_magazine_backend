@@ -116,6 +116,21 @@ const config = {
 
     // Run tests from one or more projects
     // projects: undefined,
+    projects: [
+        {
+            displayName: "unit",
+            testMatch: ["<rootDir>/__tests__/unit/**/*.test.js"], // Match all test files in the unit directory,
+            runner: "jest-runner", // Run unit tests sequentially by specifying this in the config
+            maxWorkers: 1, // Ensures that only one worker is used, making tests run sequentially
+        },
+        {
+            displayName: "integration",
+            testMatch: ["<rootDir>/__tests__/integration/**/*.test.js"], // Match all test files in the integration directory
+            setupFilesAfterEnv: ["<rootDir>/__tests__/jest.setup.js"], // Path to your setup file
+            runner: "jest-runner",
+            maxWorkers: 1, // Ensures sequential execution for integration tests
+        },
+    ],
 
     // Use this configuration option to add custom reporters to Jest
     // reporters: undefined,

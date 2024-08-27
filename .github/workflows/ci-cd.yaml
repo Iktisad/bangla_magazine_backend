@@ -24,7 +24,10 @@ jobs:
             - name: Install dependencies
               run: npm install
 
-            - name: Run tests
+            - name: Run Unit Tests
+              run: npm run test:unit
+
+            - name: Run Integration Tests
               env:
                   MONGOMS_VERSION: 10.0.0
                   MONGOMS_SYSTEM_MEMORY: 2048 # Limit memory usage to 2GB
@@ -33,21 +36,22 @@ jobs:
                   MONGOMS_PLATFORM: linux # Ensure correct platform is used
                   MONGOMS_ARCH: x64 # Specify architecture
                   MONGOMS_DEBUG: true # Enable debug logs for troubleshooting
-              run: npm test
+              run: |
+                  jest --selectProjects integration
 
-    # deploy:
-    #     runs-on: ubuntu-latest
-    #     needs: build
-    #     steps:
-    #         - name: Deploy to DigitalOcean
-    #           uses: appleboy/ssh-action@v0.1.5
-    #           with:
-    #               host: ${{ secrets.DROPLET_IP }}
-    #               username: ${{ secrets.DROPLET_USER }}
-    #               key: ${{ secrets.DROPLET_KEY }}
-    #               script: |
-    #                   cd /path/to/your/project
-    #                   git pull origin main
-    #                   npm install
-    #                   npm run build
-    #                   pm2 restart all
+        # deploy:
+        #   runs-on: ubuntu-latest
+        #   needs: build
+        #   steps:
+        #       - name: Deploy to DigitalOcean
+        #         uses: appleboy/ssh-action@v0.1.5
+        #         with:
+        #             host: ${{ secrets.DROPLET_IP }}
+        #             username: ${{ secrets.DROPLET_USER }}
+        #             key: ${{ secrets.DROPLET_KEY }}
+        #             script: |
+        #                 cd /path/to/your/project
+        #                 git pull origin main
+        #                 npm install
+        #                 npm run build
+        #                 pm2 restart all
