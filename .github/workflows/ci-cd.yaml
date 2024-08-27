@@ -36,8 +36,7 @@ jobs:
                   MONGOMS_PLATFORM: linux # Ensure correct platform is used
                   MONGOMS_ARCH: x64 # Specify architecture
                   MONGOMS_DEBUG: true # Enable debug logs for troubleshooting
-              run: |
-                  jest --selectProjects integration
+              run: npm run test:e2e
 
         # deploy:
         #   runs-on: ubuntu-latest
