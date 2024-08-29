@@ -10,6 +10,7 @@
 -   🔵 Get a new verification link if the old link expires.
 -   🔵 Handle and throw email service errors.
 -   🔵 Github secrets setup
+-   🔵 Implement singleton in DI Container
 
 ## ⚠️ Warnings
 
@@ -17,6 +18,7 @@
 
 ## ✅ Done
 
+-   🟢 Remove arrow wrappers from the routes and implement bind in controllers to keep the context
 -   🟢 Implement a search user functionality by firstname, lastname, username, or email.
 -   🟢 Fix DOB format in the user model.
 -   🟢 Implement express validator.

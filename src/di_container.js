@@ -11,10 +11,15 @@ import { UserController } from "./users/user.controller.js";
 
 class DIContainer {
     constructor() {
+        if (DIContainer.instance) {
+            return DIContainer.instance;
+        }
         this.services = {};
         this.controllers = {};
         this.initServices();
         this.initControllers();
+
+        DIContainer.instance = this; // Cache the instance
     }
 
     initServices() {
@@ -53,6 +58,12 @@ class DIContainer {
     getController(controllerName) {
         return this.controllers[controllerName];
     }
+    static getInstance() {
+        if (!DIContainer.instance) {
+            DIContainer.instance = new DIContainer();
+        }
+        return DIContainer.instance;
+    }
 }
 
-export default new DIContainer();
+export default DIContainer.getInstance(); // Export the singleton instance;

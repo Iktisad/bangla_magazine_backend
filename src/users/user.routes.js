@@ -5,61 +5,45 @@ const router = express.Router();
 
 export default (userController) => {
     // check if user exists
-    router.get("/check-exists", (req, res, next) =>
-        userController.checkUserExists(req, res, next)
-    );
+    router.get("/check-exists", userController.checkUserExists);
     // User Singup
-    router.post("/signup", validateSignup, validate, (req, res, next) =>
-        userController.signup(req, res, next)
-    );
+    router.post("/signup", validateSignup, validate, userController.signup);
 
     // User Login
-    router.post("/login", validateLogin, validate, (req, res, next) =>
-        userController.login(req, res, next)
-    );
+    router.post("/login", validateLogin, validate, userController.login);
 
     // Fetch User profile
-    router.get("/me", verifyToken, (req, res, next) =>
-        userController.getProfile(req, res, next)
-    );
+    router.get("/me", verifyToken, userController.getProfile);
 
     // Verify Email
-    router.get("/verify-email", (req, res, next) =>
-        userController.verifyEmail(req, res, next)
-    );
+    router.get("/verify-email", userController.verifyEmail);
 
     // Update User Profile
-    router.patch("/me", verifyToken, (req, res, next) =>
-        userController.updateProfile(req, res, next)
-    );
+    router.patch("/me", verifyToken, userController.updateProfile);
     // Request password reset via email
-    router.post("/request-password-reset", (req, res, next) => {
-        userController.requestPasswordReset(req, res, next);
-    });
+    router.post("/request-password-reset", userController.requestPasswordReset);
 
     // Reset password via token (from email link)
-    router.post("/reset-password", (req, res, next) => {
-        userController.changePasswordViaEmail(req, res, next);
-    });
+    router.post("/reset-password", userController.changePasswordViaEmail);
 
     // Change password via account settings (authenticated)
-    router.post("/change-password", verifyToken, (req, res, next) => {
-        userController.changePassword(req, res, next);
-    });
+    router.post("/change-password", verifyToken, userController.changePassword);
     // Search and Fetch User (Admin Only)
-    router.get("/", verifyToken, authorizeRoles("admin"), (req, res, next) =>
-        userController.getAllProfile(req, res, next)
+    router.get(
+        "/",
+        verifyToken,
+        authorizeRoles("admin"),
+        userController.getAllProfile
     );
 
     // Resend verification email
-    router.post("/resend-verification-email", (req, res, next) =>
-        userController.resendVerificationEmail(req, res, next)
+    router.post(
+        "/resend-verification-email",
+        userController.resendVerificationEmail
     );
 
     // Upload User Profile Photo
-    router.post("/me/photo", verifyToken, (req, res, next) =>
-        userController.uploadProfilePhoto(req, res, next)
-    );
+    router.post("/me/photo", verifyToken, userController.uploadProfilePhoto);
 
     return router;
 };
