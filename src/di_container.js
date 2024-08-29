@@ -70,6 +70,13 @@ class DIContainer {
         }
         return DIContainer.instance;
     }
+    static getInstance() {
+        if (!DIContainer.instance) {
+            DIContainer.instance = new DIContainer();
+        }
+        return DIContainer.instance;
+    }
 }
 
+export default DIContainer.getInstance(); // Export the singleton instance;
 export default DIContainer.getInstance(); // Export the singleton instance;

@@ -11,6 +11,19 @@ import PhotoService from "../service/photo.service.js";
 export class UserController {
     constructor(UserService) {
         this.userService = UserService;
+        //binding all the methods to keep the context relevant
+        this.checkUserExists = this.checkUserExists.bind(this);
+        this.signup = this.signup.bind(this);
+        this.login = this.login.bind(this);
+        this.verifyEmail = this.verifyEmail.bind(this);
+        this.resendVerificationEmail = this.resendVerificationEmail.bind(this);
+        this.getProfile = this.getProfile.bind(this);
+        this.updateProfile = this.updateProfile.bind(this);
+        this.getAllProfile = this.getAllProfile.bind(this);
+        this.uploadProfilePhoto = this.uploadProfilePhoto.bind(this);
+        this.requestPasswordReset = this.requestPasswordReset.bind(this);
+        this.changePassword = this.changePassword.bind(this);
+        this.changePasswordViaEmail = this.changePasswordViaEmail.bind(this);
     }
     // User exists
     async checkUserExists(req, res, next) {

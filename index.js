@@ -1,4 +1,4 @@
-import App from "./app.js";
+import App from "./src/app.js";
 import { app_con, db_uri } from "./config/config.js";
 const app = new App();
 
