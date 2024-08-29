@@ -1,5 +1,5 @@
 import express from "express";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import di_container from "./di_container.js";
 import userRoutes from "./users/user.routes.js";
 // import articleRoutes from './src/magazine/article/article.routes.js';
@@ -25,6 +25,14 @@ export default class App {
         this.app.use(
             "/api/users",
             userRoutes(di_container.getController("userController"))
+        );
+        this.app.use(
+            "/api/categories",
+            userRoutes(di_container.getController("categoryController"))
+        );
+        this.app.use(
+            "/api/tags",
+            userRoutes(di_container.getController("tagController"))
         );
         // this.app.use(
         //     '/api/articles',
