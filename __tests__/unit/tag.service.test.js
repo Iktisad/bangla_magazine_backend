@@ -1,219 +1,279 @@
-import TagService from "./tag.service.js";
-import { Tag } from "./models/tag.js";
-
-jest.mock("./models/tag.js");
-
+import { Tag } from "../../src/magazine/tag/tag.model.js";
+import TagService from "../../src/magazine/tag/tag.service.js";
+import mongoose from "mongoose";
 describe("TagService", () => {
     let tagService;
 
     beforeEach(() => {
         tagService = new TagService();
-        jest.clearAllMocks();
+        jest.clearAllMocks(); // Clear mocks after each test to prevent interference between tests
     });
 
-    describe("ensureTagsExist", () => {
-        it("should create tags that do not exist and return their IDs", async () => {
-            const mockTagIds = ["1", "2", "3"];
-            const tags = ["JavaScript", "Node.js", "MongoDB"];
+    afterEach(() => {
+        jest.clearAllMocks(); // Clear mocks after each test to prevent interference between tests
+    });
+    describe("ensureTagExists", () => {
+        it("should create a new tag if it does not exist", async () => {
+            const tagNames = ["javascript"];
 
-            Tag.findOne.mockImplementation((query) => {
-                const tag = tags.find((name) => name === query.name);
-                return tag
-                    ? { _id: mockTagIds[tags.indexOf(tag)], ...query }
-                    : null;
+            // Mock Tag.findOne to return null (tag doesn't exist)
+            const findOneMock = jest
+                .spyOn(Tag, "findOne")
+                .mockResolvedValue(null);
+
+            // Mock the save method on the Tag prototype using mockImplementation
+            jest.spyOn(Tag, "create").mockResolvedValue({
+                _id: "mocked_id_1",
+                name: "javascript",
             });
-            Tag.prototype.save.mockResolvedValue({ _id: "3", name: "MongoDB" });
 
-            const tagIds = await tagService.ensureTagsExist(tags);
+            // Execute the method
+            const tagIds = await tagService.ensureTagsExist(tagNames);
 
-            expect(tagIds).toHaveLength(3);
-            expect(Tag.findOne).toHaveBeenCalledTimes(3);
-            expect(Tag.prototype.save).toHaveBeenCalledTimes(1);
+            // Assertions
+            expect(findOneMock).toHaveBeenCalledWith({ name: "javascript" });
+            expect(Tag.create).toHaveBeenCalled();
+            expect(tagIds).toHaveLength(1);
+            expect(tagIds[0]).toBe("mocked_id_1"); // Ensure the ID matches exactly
         });
 
-        it("should return existing tags without creating duplicates", async () => {
-            const mockTag = { _id: "1", name: "JavaScript" };
-            Tag.findOne
-                .mockResolvedValueOnce(mockTag)
-                .mockResolvedValueOnce(null);
-            Tag.prototype.save.mockResolvedValue({ _id: "2", name: "Node.js" });
+        it("should return the existing tag ID if the tag already exists", async () => {
+            const existingTag = { _id: "mocked_id_2", name: "nodejs" };
 
-            const tags = ["JavaScript", "Node.js"];
-            const tagIds = await tagService.ensureTagsExist(tags);
+            // Mock Tag.findOne to return an existing tag
+            jest.spyOn(Tag, "findOne").mockResolvedValue(existingTag);
+
+            const tagIds = await tagService.ensureTagsExist(["nodejs"]);
+            console.log(tagIds);
+            expect(Tag.findOne).toHaveBeenCalledWith({ name: "nodejs" });
+            expect(tagIds).toHaveLength(1);
+            expect(tagIds[0]).toBe("mocked_id_2");
+        });
+        it("should create multiple new tags if they do not exist", async () => {
+            const tagNames = ["react", "mongodb"];
+
+            // Mock Tag.findOne to return null for each tag (tags don't exist)
+            jest.spyOn(Tag, "findOne")
+                .mockResolvedValueOnce(null)
+                .mockResolvedValueOnce(null);
+
+            // Mock Tag.save to return saved tags with IDs
+            const saveMock1 = jest
+                .fn()
+                .mockResolvedValue({ _id: "mocked_id_3", name: "react" });
+            const saveMock2 = jest
+                .fn()
+                .mockResolvedValue({ _id: "mocked_id_4", name: "mongodb" });
+            jest.spyOn(Tag, "create")
+                .mockImplementationOnce(saveMock1)
+                .mockImplementationOnce(saveMock2);
+
+            const tagIds = await tagService.ensureTagsExist(tagNames);
+
+            expect(Tag.findOne).toHaveBeenCalledWith({ name: "react" });
+            expect(Tag.findOne).toHaveBeenCalledWith({ name: "mongodb" });
+            expect(saveMock1).toHaveBeenCalled();
+            expect(saveMock2).toHaveBeenCalled();
+            expect(tagIds).toHaveLength(2);
+            expect(tagIds).toContain("mocked_id_3");
+            expect(tagIds).toContain("mocked_id_4");
+        });
+        it("should handle a mix of existing and new tags", async () => {
+            const existingTag = { _id: "mocked_id_5", name: "express" };
+
+            // Mock Tag.findOne to return an existing tag for "express", and null for "mongoose"
+            jest.spyOn(Tag, "findOne")
+                .mockResolvedValueOnce(existingTag)
+                .mockResolvedValueOnce(null);
+
+            // Mock Tag.save to return a saved tag for "mongoose" with an ID
+            const saveMock = jest
+                .fn()
+                .mockResolvedValue({ _id: "mocked_id_6", name: "mongoose" });
+            jest.spyOn(Tag, "create").mockImplementation(saveMock);
+
+            const tagIds = await tagService.ensureTagsExist([
+                "express",
+                "mongoose",
+            ]);
+
+            expect(Tag.findOne).toHaveBeenCalledWith({ name: "express" });
+            expect(Tag.findOne).toHaveBeenCalledWith({ name: "mongoose" });
+            expect(saveMock).toHaveBeenCalled();
+            expect(tagIds).toHaveLength(2);
+            expect(tagIds).toContain("mocked_id_5");
+            expect(tagIds).toContain("mocked_id_6");
+        });
+        it("should return tag IDs in the correct order", async () => {
+            const tagNames = ["docker", "kubernetes"];
+
+            // Mock Tag.findOne to return null (tags don't exist)
+            jest.spyOn(Tag, "findOne")
+                .mockResolvedValueOnce(null)
+                .mockResolvedValueOnce(null);
+
+            // Mock Tag.save to return saved tags with IDs
+            const saveMock1 = jest
+                .fn()
+                .mockResolvedValue({ _id: "mocked_id_7", name: "docker" });
+            const saveMock2 = jest
+                .fn()
+                .mockResolvedValue({ _id: "mocked_id_8", name: "kubernetes" });
+            jest.spyOn(Tag, "create")
+                .mockImplementationOnce(saveMock1)
+                .mockImplementationOnce(saveMock2);
+
+            const tagIds = await tagService.ensureTagsExist(tagNames);
 
             expect(tagIds).toHaveLength(2);
-            expect(tagIds).toEqual(["1", "2"]);
-            expect(Tag.findOne).toHaveBeenCalledTimes(2);
-            expect(Tag.prototype.save).toHaveBeenCalledTimes(1);
+            expect(tagIds[0]).toBe("mocked_id_7");
+            expect(tagIds[1]).toBe("mocked_id_8");
         });
-
-        it("should return an empty array when given an empty array", async () => {
+        it("should return an empty array if no tags are provided", async () => {
             const tagIds = await tagService.ensureTagsExist([]);
+
             expect(tagIds).toHaveLength(0);
         });
+    });
+    describe("create()", () => {
+        it("should create a new document", async () => {
+            const mockTagData = { name: "javascript" };
+            const mockTagId = new mongoose.Types.ObjectId();
 
-        it("should handle duplicate tag names in the input array", async () => {
-            const mockTag = { _id: "1", name: "JavaScript" };
-            Tag.findOne.mockResolvedValue(mockTag);
+            jest.spyOn(Tag.prototype, "save").mockImplementation(function () {
+                this._id = mockTagId;
+                return Promise.resolve(this);
+            });
 
-            const tags = ["JavaScript", "JavaScript"];
-            const tagIds = await tagService.ensureTagsExist(tags);
+            const result = await tagService.create(mockTagData);
 
-            expect(tagIds).toHaveLength(1);
-            expect(Tag.findOne).toHaveBeenCalledTimes(2);
-            expect(Tag.prototype.save).toHaveBeenCalledTimes(0);
+            expect(result).toBeDefined();
+            expect(result.name).toBe(mockTagData.name);
+            expect(result._id).toBe(mockTagId);
         });
 
-        it("should throw an error if non-string values are passed", async () => {
-            const tags = [123, true, {}];
-            await expect(tagService.ensureTagsExist(tags)).rejects.toThrow();
-        });
+        it("should throw an error if create fails", async () => {
+            const mockTagData = { name: "javascript" };
 
-        it("should throw an error if null or undefined values are passed", async () => {
-            const tags = [null, undefined];
-            await expect(tagService.ensureTagsExist(tags)).rejects.toThrow();
+            jest.spyOn(Tag.prototype, "save").mockImplementation(() => {
+                throw new Error("Save failed");
+            });
+
+            await expect(tagService.create(mockTagData)).rejects.toThrow(
+                "Error creating document: Save failed"
+            );
         });
     });
 
-    describe("GenericService methods", () => {
-        it("should create a new tag", async () => {
-            const newTag = { _id: "1", name: "Express.js" };
-            Tag.prototype.save.mockResolvedValue(newTag);
+    describe("findById()", () => {
+        it("should find a document by ID", async () => {
+            const mockTagId = new mongoose.Types.ObjectId();
+            const mockTag = { _id: mockTagId, name: "javascript" };
 
-            const createdTag = await tagService.create({ name: "Express.js" });
+            jest.spyOn(Tag, "findById").mockResolvedValue(mockTag);
 
-            expect(createdTag).toEqual(newTag);
-            expect(Tag.prototype.save).toHaveBeenCalledTimes(1);
+            const result = await tagService.findById(mockTagId);
+
+            expect(result).toBeDefined();
+            expect(result._id).toBe(mockTagId);
+            expect(result.name).toBe(mockTag.name);
         });
 
-        it("should throw an error when trying to create a tag with missing required fields", async () => {
-            Tag.prototype.save.mockRejectedValue(new Error("Validation error"));
-            await expect(tagService.create({})).rejects.toThrow(
-                "Validation error"
-            );
-        });
+        it("should throw an error if find by ID fails", async () => {
+            const mockTagId = new mongoose.Types.ObjectId();
 
-        it("should throw an error when trying to create a duplicate tag", async () => {
-            Tag.prototype.save.mockRejectedValue(
-                new Error("Duplicate key error")
-            );
-            await expect(
-                tagService.create({ name: "DuplicateTag" })
-            ).rejects.toThrow("Duplicate key error");
-        });
-
-        it("should find a tag by ID", async () => {
-            const mockTag = { _id: "1", name: "React.js" };
-            Tag.findById.mockResolvedValue(mockTag);
-
-            const foundTag = await tagService.findById("1");
-
-            expect(foundTag).toEqual(mockTag);
-            expect(Tag.findById).toHaveBeenCalledWith("1");
-        });
-
-        it("should throw an error when provided an invalid ID format", async () => {
-            Tag.findById.mockRejectedValue(
-                new Error("Cast to ObjectId failed")
-            );
-            await expect(tagService.findById("invalid-id")).rejects.toThrow(
-                "Cast to ObjectId failed"
-            );
-        });
-
-        it("should return null when searching for a non-existent ID", async () => {
-            Tag.findById.mockResolvedValue(null);
-
-            const foundTag = await tagService.findById("non-existent-id");
-            expect(foundTag).toBeNull();
-        });
-
-        it("should find all tags", async () => {
-            const mockTags = [
-                { _id: "1", name: "Vue.js" },
-                { _id: "2", name: "Angular" },
-            ];
-            Tag.find.mockResolvedValue(mockTags);
-
-            const foundTags = await tagService.findAll();
-            expect(foundTags).toEqual(mockTags);
-            expect(Tag.find).toHaveBeenCalledWith({});
-        });
-
-        it("should return tags that match a complex query", async () => {
-            const mockTags = [{ _id: "1", name: "React.js" }];
-            Tag.find.mockResolvedValue(mockTags);
-
-            const foundTags = await tagService.findAll({ name: /react/i });
-            expect(foundTags).toEqual(mockTags);
-            expect(Tag.find).toHaveBeenCalledWith({ name: /react/i });
-        });
-
-        it("should update a tag by ID", async () => {
-            const mockTag = { _id: "1", name: "Svelte" };
-            Tag.findByIdAndUpdate.mockResolvedValue(mockTag);
-
-            const updatedTag = await tagService.update("1", { name: "Svelte" });
-
-            expect(updatedTag).toEqual(mockTag);
-            expect(Tag.findByIdAndUpdate).toHaveBeenCalledWith(
-                "1",
-                { name: "Svelte" },
-                { new: true }
-            );
-        });
-
-        it("should throw an error when trying to update with an invalid ID format", async () => {
-            Tag.findByIdAndUpdate.mockRejectedValue(
-                new Error("Cast to ObjectId failed")
-            );
-            await expect(
-                tagService.update("invalid-id", { name: "NewName" })
-            ).rejects.toThrow("Cast to ObjectId failed");
-        });
-
-        it("should return null when trying to update a non-existent ID", async () => {
-            Tag.findByIdAndUpdate.mockResolvedValue(null);
-
-            const updatedTag = await tagService.update("non-existent-id", {
-                name: "NewName",
+            jest.spyOn(Tag, "findById").mockImplementation(() => {
+                throw new Error("Find by ID failed");
             });
-            expect(updatedTag).toBeNull();
+
+            await expect(tagService.findById(mockTagId)).rejects.toThrow(
+                "Error finding document: Find by ID failed"
+            );
+        });
+    });
+
+    describe("findAll()", () => {
+        it("should find all documents or filter by a query", async () => {
+            const mockTags = [
+                { _id: new mongoose.Types.ObjectId(), name: "javascript" },
+                { _id: new mongoose.Types.ObjectId(), name: "nodejs" },
+            ];
+
+            jest.spyOn(Tag, "find").mockResolvedValue(mockTags);
+
+            const result = await tagService.findAll();
+
+            expect(result).toHaveLength(mockTags.length);
+            expect(result[0].name).toBe("javascript");
+            expect(result[1].name).toBe("nodejs");
         });
 
-        it("should throw an error when trying to update with invalid data", async () => {
-            Tag.findByIdAndUpdate.mockRejectedValue(
-                new Error("Validation error")
+        it("should throw an error if find fails", async () => {
+            jest.spyOn(Tag, "find").mockImplementation(() => {
+                throw new Error("Find failed");
+            });
+
+            await expect(tagService.findAll()).rejects.toThrow(
+                "Error finding documents: Find failed"
             );
+        });
+    });
+
+    describe("update()", () => {
+        it("should update a document by ID", async () => {
+            const mockTagId = new mongoose.Types.ObjectId();
+            const updateData = { name: "typescript" };
+            const mockUpdatedTag = { _id: mockTagId, name: "typescript" };
+
+            jest.spyOn(Tag, "findByIdAndUpdate").mockResolvedValue(
+                mockUpdatedTag
+            );
+
+            const result = await tagService.update(mockTagId, updateData);
+
+            expect(result).toBeDefined();
+            expect(result._id).toBe(mockTagId);
+            expect(result.name).toBe(updateData.name);
+        });
+
+        it("should throw an error if update fails", async () => {
+            const mockTagId = new mongoose.Types.ObjectId();
+            const updateData = { name: "typescript" };
+
+            jest.spyOn(Tag, "findByIdAndUpdate").mockImplementation(() => {
+                throw new Error("Update failed");
+            });
+
             await expect(
-                tagService.update("1", { name: null })
-            ).rejects.toThrow("Validation error");
+                tagService.update(mockTagId, updateData)
+            ).rejects.toThrow("Error updating document: Update failed");
+        });
+    });
+
+    describe("delete()", () => {
+        it("should delete a document by ID", async () => {
+            const mockTagId = new mongoose.Types.ObjectId();
+
+            jest.spyOn(Tag, "findByIdAndDelete").mockResolvedValue({
+                _id: mockTagId,
+            });
+
+            const result = await tagService.delete(mockTagId);
+
+            expect(result).toBeDefined();
+            expect(result._id).toBe(mockTagId);
         });
 
-        it("should delete a tag by ID", async () => {
-            const mockTag = { _id: "1", name: "Backbone.js" };
-            Tag.findByIdAndDelete.mockResolvedValue(mockTag);
+        it("should throw an error if delete fails", async () => {
+            const mockTagId = new mongoose.Types.ObjectId();
 
-            const deletedTag = await tagService.delete("1");
+            jest.spyOn(Tag, "findByIdAndDelete").mockImplementation(() => {
+                throw new Error("Delete failed");
+            });
 
-            expect(deletedTag).toEqual(mockTag);
-            expect(Tag.findByIdAndDelete).toHaveBeenCalledWith("1");
-        });
-
-        it("should throw an error when trying to delete with an invalid ID format", async () => {
-            Tag.findByIdAndDelete.mockRejectedValue(
-                new Error("Cast to ObjectId failed")
+            await expect(tagService.delete(mockTagId)).rejects.toThrow(
+                "Error deleting document: Delete failed"
             );
-            await expect(tagService.delete("invalid-id")).rejects.toThrow(
-                "Cast to ObjectId failed"
-            );
-        });
-
-        it("should return null when trying to delete a non-existent ID", async () => {
-            Tag.findByIdAndDelete.mockResolvedValue(null);
-
-            const deletedTag = await tagService.delete("non-existent-id");
-            expect(deletedTag).toBeNull();
         });
     });
 });

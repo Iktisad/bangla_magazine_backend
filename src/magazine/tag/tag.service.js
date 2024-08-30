@@ -1,4 +1,4 @@
-import { Tag } from "./models/tag.js";
+import { Tag } from "./tag.model.js";
 import GenericService from "../shared/generic.service.js";
 
 export default class TagService extends GenericService {
@@ -12,8 +12,9 @@ export default class TagService extends GenericService {
         for (const tagName of tags) {
             let tag = await Tag.findOne({ name: tagName });
             if (!tag) {
-                tag = new Tag({ name: tagName });
-                await tag.save();
+                tag = await Tag.create({ name: tagName });
+                // tag = new Tag({ name: tagName });
+                // await tag.save();
             }
             tagIds.push(tag._id);
         }
