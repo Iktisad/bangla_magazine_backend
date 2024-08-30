@@ -10,7 +10,7 @@
     "test": "jest --detectOpenHandles --forceExit",
     "test:unit": "jest --selectProjects unit --runInBand",
     "test:e2e": "jest --selectProjects integration --runInBand --detectOpenHandles --forceExit",
-    "test:tdd": "jest"
+    "tdd:unit": "jest --watch --testPathPattern=__tests__/unit"
   },
   "keywords": [
     "Bangla",
