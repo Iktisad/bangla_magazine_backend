@@ -6,6 +6,8 @@
 @test_email="iktisad.rashid@gmail.com"
 @test_password="securepassword123"
 @test_username="PunkHazard095"
+
+
 ###--------Check If User Exists-------###
 ### EMAIL
 ###----->
@@ -15,6 +17,8 @@ GET {{api}}/check-exists?email=iktisad.rashid@gmail.com
 GET {{api}}/check-exists?username=PunkHazard095
 
 ###-----------------------------------###
+
+
 ###-------------Login User------------###
 ###----->
 POST {{api}}/login
@@ -25,8 +29,8 @@ Content-Type: application/json
     "password": "securepassword123"
 }
 
-
 ###-----------------------------------###
+
 
 ###------------Create User------------###
 ###----->
@@ -71,12 +75,13 @@ Content-Type: application/json
 
 ###------------------------------------###
 
+
 ###-------Get logged in user-----------###
 ###----->
 GET {{api}}/me
 Authorization: Bearer {{token}}
-###------------------------------------###
 
+###------------------------------------###
 
 
 ###-------------Admin Search-----------###
@@ -88,6 +93,7 @@ GET {{api}}?q=john.doe@example.com
 Authorization: Bearer {{token}}
 
 ###------------------------------------###
+
 
 ###-------Profile Photo Upload---------###
 
@@ -116,6 +122,7 @@ Authorization: Bearer {{token}}
 
 ###-----------------------------------###
 
+
 ### request to change password via email
 ###----Reset Password Request---------###
 ###----->
@@ -128,6 +135,7 @@ Content-Type: application/json
 
 ###-----------------------------------###
 
+
 ### change passward via email link
 ###-----------Reset Password----------###
 ###----->
@@ -139,8 +147,8 @@ Content-Type: application/json
   "newPassword": "newsecurepass123"
 }
 
-
 ###-----------------------------------###
+
 
 ### Change password from profile or account settings
 ###----->
@@ -152,3 +160,5 @@ Authorization: Bearer {{token}}
   "currentPassword":"newsecurepass123",
   "newPassword": "securepassword123"
 }
+
+###-----------------------------------###
