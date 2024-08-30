@@ -36,36 +36,34 @@ export class UserController {
                     .json({ message: "Username or email required" });
             }
 
-            let user = null;
+            let result = null;
             if (username) {
-                user = await this.userService.checkUserByUsername(username);
+                result = await this.userService.userExists({ username });
             } else if (email) {
-                user = await this.userService.checkUserByEmail(email);
+                result = await this.userService.userExists({ email });
             }
 
-            if (user) {
-                return res.status(200).json({ exists: true });
-            }
+            if (!result.exists) throw new NotFoundException(result.error);
 
-            return res.status(200).json({ exists: false });
+            return res.status(200).json({ exists: true });
         } catch (error) {
-            if (error instanceof ConflictException) {
-                return res
-                    .status(error.statusCode)
-                    .json({ message: error.message });
+            if (error instanceof NotFoundException) {
+                logger.warn(error.message);
+                return res.status(error.statusCode).json({ exists: false });
             }
-            logger.error(error.message);
             next(error);
         }
     }
     // User signup
     async signup(req, res, next) {
         try {
-            const user = await this.userService.createUser(req.body);
+            const result = await this.userService.createUser(req.body);
+            if (result.status === 409)
+                throw new ConflictException(result.error);
 
-            await EmailService.sendVerificationEmail(user);
+            await EmailService.sendVerificationEmail(result.user);
             return res
-                .status(201)
+                .status(result.status)
                 .send(
                     "Signup successful! Please check your email to verify your account."
                 );
@@ -78,14 +76,13 @@ export class UserController {
                     .json({ message: error.message });
             }
             if (error.name === "TokenExpiredError") {
-                logger.warn(error.message);
+                logger.error(error.message);
                 return res
                     .status(401)
                     .send(
                         "Token Expired!! Please request to resend verification email."
                     );
             }
-            logger.error(error.message);
             next(error);
         }
     }
@@ -94,11 +91,14 @@ export class UserController {
     async login(req, res, next) {
         try {
             const { email, password } = req.body;
-            const token = await this.userService.authenticateUser(
+            const result = await this.userService.authenticateUser(
                 email,
                 password
             );
-            return res.status(200).json({ token });
+            if (result.status === 401)
+                throw new UnauthorizedException(result.error);
+
+            return res.status(result.status).json({ token: result.token });
         } catch (error) {
             if (error instanceof UnauthorizedException) {
                 logger.warn(error.message);
@@ -106,7 +106,6 @@ export class UserController {
                     .status(error.statusCode)
                     .json({ message: error.message });
             }
-            logger.error(error.message);
             next(error);
         }
     }
@@ -114,18 +113,18 @@ export class UserController {
     async verifyEmail(req, res, next) {
         try {
             const { token } = req.query;
-            await this.userService.verifyUser(token);
-            return res
-                .status(200)
-                .send("Account verified! You can now log in.");
+            const result = await this.userService.verifyUser(token);
+            if (result.status === 401)
+                throw new UnauthorizedException(result.error);
+            return res.status(200).send(result.message);
         } catch (error) {
             if (error instanceof UnauthorizedException) {
                 logger.warn(error.message);
-                res.status(error.statusCode).json({ message: error.message });
-            } else {
-                logger.error(error.message);
-                next(error);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
             }
+            next(error);
         }
     }
     //? Needs to be tested and error needs to be handled
@@ -134,24 +133,45 @@ export class UserController {
             const { email } = req.body;
 
             // Send verification email
-            const user = await this.userService.resetVerificationEmailToken(
+            const result = await this.userService.resetVerificationEmailToken(
                 email
             );
-            await EmailService.sendVerificationEmail(user);
-            return res.status(200).json({
+            if (result.status === 404)
+                throw new NotFoundException(result.error);
+            else if (result.status === 409)
+                throw new ConflictException(result.error);
+
+            await EmailService.sendVerificationEmail(result.user);
+            return res.status(200).send({
                 message: "Verification email resent successfully",
-                user,
             });
         } catch (error) {
-            logger.warn(error.message);
+            if (error instanceof NotFoundException) {
+                logger.error(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
+            if (error instanceof ConflictException) {
+                logger.warn(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
             next(error);
         }
     }
     // Fetch user details
     async getProfile(req, res, next) {
         try {
-            const user = await this.userService.getUserById(req.user.id);
-            return res.status(200).json(user);
+            const result = await this.userService.getUserById(req.user.id);
+
+            if (result.status === 400)
+                throw new BadRequestException(result.error);
+            else if (result.status === 404)
+                throw new NotFoundException(result.error);
+
+            return res.status(200).json(result.user);
         } catch (error) {
             if (error instanceof BadRequestException) {
                 logger.warn(error.message);
@@ -165,7 +185,6 @@ export class UserController {
                     .status(error.statusCode)
                     .json({ message: error.message });
             }
-            logger.error(error.message);
             next(error);
         }
     }
@@ -173,8 +192,14 @@ export class UserController {
     // Update user profile
     async updateProfile(req, res, next) {
         try {
-            const user = await this.userService.updateUser(req.user.id, req);
-            res.status(200).json(user);
+            const result = await this.userService.updateUser(req.user.id, req);
+
+            if (result.status === 400)
+                throw new BadRequestException(result.error);
+            else if (result.status === 404)
+                throw new NotFoundException(result.error);
+
+            res.status(200).json(result.user);
         } catch (error) {
             if (error instanceof BadRequestException) {
                 logger.warn(error.message);
@@ -188,7 +213,6 @@ export class UserController {
                     .status(error.statusCode)
                     .json({ message: error.message });
             }
-            logger.error(error.message);
             next(error);
         }
     }
@@ -196,10 +220,15 @@ export class UserController {
     // Fetch all users (admin only)
     async getAllProfile(req, res, next) {
         try {
-            const users = await this.userService.getAllUsers(req);
-            return res.status(200).json(users);
+            const result = await this.userService.getAllUsers(req);
+            if (result.status === 404)
+                throw new NotFoundException(result.error);
+            return res.status(200).json(result.users);
         } catch (error) {
-            logger.error(error.message);
+            if (error instanceof NotFoundException)
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
             next(error);
         }
     }
@@ -207,7 +236,7 @@ export class UserController {
     async uploadProfilePhoto(req, res, next) {
         try {
             const imageUrl = await PhotoService.uploadSingleOnDisc(req, res);
-            const user = await this.userService.updateUser(req.user.id, {
+            const result = await this.userService.updateUser(req.user.id, {
                 body: {
                     profile: {
                         profilePicture: imageUrl,
@@ -215,27 +244,50 @@ export class UserController {
                 },
             });
 
-            return res.status(200).json({
+            if (result.status === 400)
+                throw new BadRequestException(result.error);
+            else if (result.status === 404)
+                throw new NotFoundException(result.error);
+
+            return res.status(result.status).send({
                 message: "Photo uploaded successfully",
-                user,
+                user: result.user,
             });
+
+            //
         } catch (error) {
-            logger.error(error.message);
+            if (
+                error instanceof BadRequestException ||
+                error instanceof NotFoundException
+            ) {
+                logger.error(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
             next(error);
         }
     }
     async requestPasswordReset(req, res, next) {
         try {
             const { email } = req.body;
-            const resetToken = await this.userService.requestPasswordReset({
+            const result = await this.userService.requestPasswordReset({
                 email,
             });
-            await EmailService.sendPasswordResetEmail(email, resetToken);
+            if (result.status === 404)
+                throw new NotFoundException(result.error);
+
+            await EmailService.sendPasswordResetEmail(email, result.resetToken);
             return res
-                .status(200)
+                .status(result.status)
                 .send(`Password reset email sent successfully at ${email}`);
         } catch (error) {
-            logger.error(error.message);
+            if (error instanceof NotFoundException) {
+                logger.error(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
             next(error);
         }
     }
@@ -243,15 +295,30 @@ export class UserController {
     async changePassword(req, res, next) {
         try {
             const { currentPassword, newPassword } = req.body;
-            await this.userService.resetPassword({
+            const result = await this.userService.resetPassword({
                 userId: req.user.id,
                 currentPassword,
                 newPassword,
             });
 
-            return res.status(201).send("Password changed successfully");
+            if (result.status === 404)
+                throw new NotFoundException(result.error);
+            else if (result.status === 400)
+                throw new BadRequestException(result.error);
+
+            return res
+                .status(result.status)
+                .send("Password changed successfully");
         } catch (error) {
-            logger.error(error.message);
+            if (
+                error instanceof BadRequestException ||
+                error instanceof NotFoundException
+            ) {
+                logger.error(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
             next(error);
         }
     }
@@ -260,13 +327,22 @@ export class UserController {
     async changePasswordViaEmail(req, res, next) {
         try {
             const { token, newPassword } = req.body;
-            await this.userService.resetPasswordViaEmail({
+            const result = await this.userService.resetPasswordViaEmail({
                 token,
                 newPassword,
             });
-            return res.status(200).send("Password has been reset successfully");
+            if (result.status === 404)
+                throw new NotFoundException(result.error);
+            return res
+                .status(result.status)
+                .send("Password has been reset successfully");
         } catch (error) {
-            logger.error(error.message);
+            if (error instanceof NotFoundException) {
+                logger.error(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
             next(error);
         }
     }
