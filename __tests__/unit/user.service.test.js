@@ -4,11 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { jwt_var } from "../../config/config.js";
 import mongoose from "mongoose";
-import {
-    BadRequestException,
-    NotFoundException,
-    UnauthorizedException,
-} from "../../src/exceptions/http.exception.js";
+import { UnauthorizedException } from "../../src/exceptions/http.exception.js";
 
 describe("UserService", () => {
     let userService;
