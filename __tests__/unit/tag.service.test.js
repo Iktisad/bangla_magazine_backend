@@ -135,7 +135,7 @@ describe("TagService", () => {
             expect(tagIds).toHaveLength(0);
         });
     });
-    describe("create()", () => {
+    describe("create", () => {
         it("should create a new document", async () => {
             const mockTagData = { name: "javascript" };
             const mockTagId = new mongoose.Types.ObjectId();
@@ -165,7 +165,7 @@ describe("TagService", () => {
         });
     });
 
-    describe("findById()", () => {
+    describe("findById", () => {
         it("should find a document by ID", async () => {
             const mockTagId = new mongoose.Types.ObjectId();
             const mockTag = { _id: mockTagId, name: "javascript" };
@@ -192,7 +192,7 @@ describe("TagService", () => {
         });
     });
 
-    describe("findAll()", () => {
+    describe("findAll", () => {
         it("should find all documents or filter by a query", async () => {
             const mockTags = [
                 { _id: new mongoose.Types.ObjectId(), name: "javascript" },
@@ -219,7 +219,7 @@ describe("TagService", () => {
         });
     });
 
-    describe("update()", () => {
+    describe("update", () => {
         it("should update a document by ID", async () => {
             const mockTagId = new mongoose.Types.ObjectId();
             const updateData = { name: "typescript" };
@@ -250,7 +250,7 @@ describe("TagService", () => {
         });
     });
 
-    describe("delete()", () => {
+    describe("delete", () => {
         it("should delete a document by ID", async () => {
             const mockTagId = new mongoose.Types.ObjectId();
 
