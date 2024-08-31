@@ -3,7 +3,12 @@ import jwt from "jsonwebtoken";
 import { User } from "./user.model.js";
 import { jwt_var } from "../../config/config.js";
 import { deepMerge } from "../utils/helper.js";
-
+import {
+    BadRequestException,
+    ConflictException,
+    NotFoundException,
+    UnauthorizedException,
+} from "../exceptions/http.exception.js";
 export class UserService {
     async createUser(body) {
         const { username, email, password, profile } = body;
@@ -12,7 +17,7 @@ export class UserService {
             $or: [{ username }, { email }],
         });
         if (existingUser) {
-            return { error: "Username or email already exists", status: 409 };
+            throw new ConflictException("Username or email already exists");
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -28,45 +33,37 @@ export class UserService {
 
         await user.save();
 
-        return { user, status: 201 };
+        return user;
     }
 
     async verifyUser(token) {
         jwt.verify(token, jwt_var.secret);
         const user = await User.findOne({ verificationToken: token });
         if (!user) {
-            return { error: "Invalid verification token", status: 401 };
+            throw new UnauthorizedException("Invalid verification token");
         }
 
         user.isActive = true;
         user.verificationToken = null;
         await user.save();
-        return {
-            message: "Account verified! You can now log in.",
-            status: 200,
-        };
+        return user;
     }
 
     async userExists(field) {
-        const exists = await User.exists(field);
-        return { exists, status: exists ? 200 : 404 };
+        return await User.exists(field);
     }
 
     async authenticateUser(email, password) {
         const user = await User.findOne({ email });
-        if (!user) return { error: "Invalid email", status: 401 };
+        if (!user) throw new UnauthorizedException("Invalid email");
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return { error: "Invalid password", status: 401 };
-        }
+        if (!isMatch) throw new UnauthorizedException("Invalid password");
 
-        if (!user.isActive) {
-            return {
-                error: "Please verify your email before logging in",
-                status: 401,
-            };
-        }
+        if (!user.isActive)
+            throw new UnauthorizedException(
+                "Please verify your email before logging in"
+            );
 
         const token = jwt.sign(
             { id: user._id, role: user.role, username: user.username },
@@ -75,40 +72,33 @@ export class UserService {
                 expiresIn: jwt_var.expiration || "1h",
             }
         );
-        return { token, status: 200 };
+        return token;
     }
 
     async getUserById(userId) {
-        if (!userId) return { error: "User ID is required", status: 400 };
+        if (!userId) throw new BadRequestException("User ID is required");
 
         const user = await User.findById(userId).select(
             "-password -verificationToken"
         );
-        if (!user) return { error: "User not found", status: 404 };
+        if (!user) throw new NotFoundException("User not found");
 
-        return { user, status: 200 };
+        return user;
     }
 
     async updateUser(userId, { body }) {
-        if (!userId)
-            return {
-                error: "User ID is required",
-                status: 400,
-            };
+        if (!userId) throw new BadRequestException("User ID is required");
 
         // Ensure the body is not empty
         if (Object.keys(body).length === 0)
-            return {
-                error: "No fields provided for update",
-                status: 400,
-            };
+            throw new BadRequestException("No fields provided for update");
 
         // Find the user by ID
         const user = await User.findById(userId).select(
             "-password -verificationToken"
         );
 
-        if (!user) return { error: "User not found", status: 404 };
+        if (!user) throw new NotFoundException("User not found");
 
         // Apply the custom deep merge to update only the specified fields
         deepMerge(user, body);
@@ -116,7 +106,7 @@ export class UserService {
         // Save the updated user document, triggering Mongoose validation
         await user.save();
 
-        return { user, status: 200 };
+        return user;
     }
 
     async getAllUsers({ query }) {
@@ -133,56 +123,49 @@ export class UserService {
         const users = await User.find(filter).select(
             "-password -verificationToken"
         );
-        if (users.length < 1) return { error: "No users found", stauts: 404 };
+        if (users.length < 1) throw new NotFoundException("No users found");
 
-        return { users, stauts: 200 };
+        return users;
     }
 
     async resetVerificationEmailToken(email) {
         const user = await User.findOne({ email });
-        if (!user) return { error: "User not found", status: 404 };
+        if (!user) throw new NotFoundException("User not found");
 
         if (user.isActive)
-            return { error: "Email is already verified", status: 404 };
+            throw new NotFoundException("Email is already verified");
 
         // Generate a new verification token
         const verificationToken = this.#generateToken(email);
         user.verificationToken = verificationToken;
         await user.save();
 
-        return { user, status: 200 };
+        return user;
     }
     async resetPassword({ userId, currentPassword, newPassword }) {
         const user = await User.findById(userId);
-        if (!user) {
-            return { error: "User not found", staut: 404 };
-        }
+        if (!user) throw new NotFoundException("User not found");
 
         const isMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!isMatch) {
-            return { error: "Current password is incorrect", staut: 400 };
-            // throw new BadRequestException("Current password is incorrect");
-        }
+        if (!isMatch)
+            throw new BadRequestException("Current password is incorrect");
 
         user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
 
-        return { user, status: 201 };
+        return user;
     }
     // Request password reset via email
     async requestPasswordReset({ email }) {
         const user = await User.findOne({ email });
         if (!user)
-            return {
-                error: "User with this email does not exist",
-                status: 404,
-            };
+            throw new NotFoundException("User with this email does not exist");
 
         const resetToken = this.#generateToken(email);
         user.resetPasswordToken = resetToken;
         await user.save();
 
-        return { resetToken, status: 200 };
+        return resetToken;
     }
     // Reset password using the token sent via email
     async resetPasswordViaEmail({ token, newPassword }) {
@@ -190,13 +173,13 @@ export class UserService {
 
         const user = await User.findOne({ email: decoded.email });
 
-        if (!user) return { error: "User not found", status: 404 };
+        if (!user) throw new NotFoundException("User not found");
 
         user.password = await bcrypt.hash(newPassword, 10);
         user.resetPasswordToken = null; // Clear the reset token after successful password reset
         await user.save();
 
-        return { user, status: 201 };
+        return user;
     }
 
     // Generate verification token

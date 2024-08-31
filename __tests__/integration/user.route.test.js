@@ -146,7 +146,6 @@ describe("User Module E2E Tests", () => {
             const response = await request(global.app)
                 .get("/api/users/me")
                 .set("Authorization", `Bearer ${token}`);
-
             expect(response.status).toBe(200);
             expect(response.body.username).toBe("adminUser");
             expect(response.body.email).toBe("admin@gmail.com");
@@ -219,7 +218,7 @@ describe("User Module E2E Tests", () => {
                     newPassword: "newpassword123",
                 });
 
-            expect(response.status).toBe(201);
+            expect(response.status).toBe(200);
             expect(response.text).toBe("Password changed successfully");
         });
         it("should log in with the new password successfully", async () => {
@@ -321,9 +320,6 @@ describe("User Module E2E Tests", () => {
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("Photo uploaded successfully");
             expect(response.body.user.profile.profilePicture).toBeDefined();
-            // expect(response.body.user.profile.profilePicture).toBe(
-            //     "uploads/mocked-image.jpg"
-            // );
         });
     });
 });
