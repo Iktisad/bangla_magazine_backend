@@ -6,10 +6,10 @@ import { UserController } from "./users/user.controller.js";
 // import { ArtworkController } from "./magazine/artwork/artwork.controller.js";
 // import { PodcastService } from "./podcast/podcast.service.js";
 // import { PodcastController } from "./podcast/podcast.controller.js";
-import CategoryController from "./magazine/category/category.controller.js";
-import CategoryService from "./magazine/category/category.service.js";
+// import CategoryController from "./magazine/category/category.controller.js";
+// import CategoryService from "./magazine/category/category.service.js";
 import TagController from "./magazine/tag/tag.controller.js";
-import TagService from "./magazine/tags/tag.service.js";
+import TagService from "./magazine/tag/tag.service.js";
 
 //This is a singleton class and behaviour is ensured
 class DIContainer {
@@ -25,7 +25,7 @@ class DIContainer {
     }
 
     initServices() {
-        this.services.categoryService = new CategoryService();
+        // this.services.categoryService = new CategoryService();
         this.services.tagService = new TagService();
         this.services.userService = new UserService();
         // this.services.articleService = new ArticleService();
@@ -49,9 +49,9 @@ class DIContainer {
         // this.controllers.podcastController = new PodcastController(
         //     this.podcastService
         // );
-        this.controllers.categoryController = new CategoryController(
-            this.services.categoryService
-        );
+        // this.controllers.categoryController = new CategoryController(
+        //     this.services.categoryService
+        // );
         this.controllers.tagController = new TagController(
             this.services.categoryService
         );

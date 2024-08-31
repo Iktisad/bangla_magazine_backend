@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import di_container from "./di_container.js";
 import userRoutes from "./users/user.routes.js";
+import tagRoutes from "./magazine/tag/tag.routes.js";
 // import articleRoutes from './src/magazine/article/article.routes.js';
 // import categoryRoutes from './src/magazine/category/category.routes.js';
 // import podcastRoutes from './src/podcast/podcast.routes.js';
@@ -26,13 +27,13 @@ export default class App {
             "/api/users",
             userRoutes(di_container.getController("userController"))
         );
-        this.app.use(
-            "/api/categories",
-            userRoutes(di_container.getController("categoryController"))
-        );
+        // this.app.use(
+        //     "/api/categories",
+        //     userRoutes(di_container.getController("categoryController"))
+        // );
         this.app.use(
             "/api/tags",
-            userRoutes(di_container.getController("tagController"))
+            tagRoutes(di_container.getController("tagController"))
         );
         // this.app.use(
         //     '/api/articles',
