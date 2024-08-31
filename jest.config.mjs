@@ -126,6 +126,8 @@ const config = {
         {
             displayName: "integration",
             testMatch: ["<rootDir>/__tests__/integration/**/*.test.js"], // Match all test files in the integration directory
+            globalSetup: "<rootDir>/__tests__/jest.globalSetup.js", // Global setup for integration tests
+            globalTeardown: "<rootDir>/__tests__/jest.globalTeardown.js", // Global teardown for integration tests
             setupFilesAfterEnv: ["<rootDir>/__tests__/jest.setup.js"], // Path to your setup file
             runner: "jest-runner",
             maxWorkers: 1, // Ensures sequential execution for integration tests
