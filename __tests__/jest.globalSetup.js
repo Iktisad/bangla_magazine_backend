@@ -1,8 +1,8 @@
 import App from "../src/app.js";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
-// import seedUsers from "../seed/user.seed.js";
-// import seedtags from "../seed/tags.seed.js";
+import seedUsers from "../seed/user.seed.js";
+import seedtags from "../seed/tags.seed.js";
 
 let mongoServer;
 let appInstance;
@@ -24,6 +24,6 @@ export default async () => {
     global.app = appInstance.app;
     global.__MONGOD__ = mongoServer;
 
-    // await seedUsers();
-    // await seedtags();
+    await seedUsers();
+    await seedtags();
 };
