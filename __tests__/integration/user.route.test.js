@@ -28,25 +28,19 @@ jest.spyOn(fs, "mkdirSync").mockImplementation(() => {}); // Prevent actual dire
 let token;
 let mockSendMail;
 
+beforeAll(() => {
+    // jest.resetModules(); // Resets the module registry
+    mockSendMail = jest.fn().mockResolvedValue(true);
+    nodemailer.createTransport.mockReturnValue(() => ({
+        sendMail: mockSendMail,
+    }));
+});
+
+afterEach(() => {
+    jest.clearAllMocks(); // Clear mocks after each test
+    // jest.resetModules(); // Resets the module registry
+});
 describe("User Module E2E Tests", () => {
-    beforeAll(() => {
-        jest.resetModules(); // Resets the module registry
-        mockSendMail = jest.fn().mockResolvedValue(true);
-        nodemailer.createTransport.mockReturnValue(() => ({
-            sendMail: mockSendMail,
-        }));
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks(); // Clear mocks after each test
-        jest.resetModules(); // Resets the module registry
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks(); // Clear mocks after each test
-        jest.resetModules(); // Resets the module registry
-    });
-
     describe("POST: api/users/signup", () => {
         it("should sign up a new user successfully", async () => {
             const mockUser = {
