@@ -4,7 +4,12 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { jwt_var } from "../../config/config.js";
 import mongoose from "mongoose";
-import { UnauthorizedException } from "../../src/exceptions/http.exception.js";
+import {
+    BadRequestException,
+    ConflictException,
+    NotFoundException,
+    UnauthorizedException,
+} from "../../src/exceptions/http.exception.js";
 
 describe("UserService", () => {
     let userService;
@@ -29,7 +34,7 @@ describe("UserService", () => {
                 expect(User.exists).toHaveBeenCalledWith({
                     username: mockUsername,
                 });
-                expect(result.exists).toBe(true);
+                expect(result).toBe(true);
             });
 
             it("should return false if no user with the given username exists", async () => {
@@ -43,7 +48,7 @@ describe("UserService", () => {
                 expect(User.exists).toHaveBeenCalledWith({
                     username: mockUsername,
                 });
-                expect(result.exists).toBe(false);
+                expect(result).toBe(false);
             });
         });
 
@@ -57,7 +62,7 @@ describe("UserService", () => {
                 });
 
                 expect(User.exists).toHaveBeenCalledWith({ email: mockEmail });
-                expect(result.exists).toBe(true);
+                expect(result).toBe(true);
             });
 
             it("should return false if no user with the given email exists", async () => {
@@ -69,7 +74,7 @@ describe("UserService", () => {
                 });
 
                 expect(User.exists).toHaveBeenCalledWith({ email: mockEmail });
-                expect(result.exists).toBe(false);
+                expect(result).toBe(false);
             });
         });
     });
@@ -105,17 +110,16 @@ describe("UserService", () => {
                 },
             };
 
-            const { user, status } = await userService.createUser(userBody);
+            const user = await userService.createUser(userBody);
 
             expect(bcrypt.hash).toHaveBeenCalledWith("password", 10);
             expect(user.username).toBe("testuser");
             expect(user.email).toBe("test@gmail.com");
             expect(user.password).toBe("hashedPassword");
             expect(user.verificationToken).toBeDefined();
-            expect(status).toBe(201);
         });
 
-        it("should return a Conflict Error(409) if user already exists", async () => {
+        it("should return a ConflictException(409) if user already exists", async () => {
             // Mock User.exists to return true (indicating user exists)
             jest.spyOn(User, "exists").mockResolvedValue(true);
 
@@ -129,9 +133,14 @@ describe("UserService", () => {
                 },
             };
 
-            const result = await userService.createUser(userBody);
-            expect(result.error).toBe("Username or email already exists");
-            expect(result.status).toBe(409);
+            // Expect the createUser method to throw a ConflictError
+            try {
+                await userService.createUser(userBody);
+            } catch (error) {
+                expect(error).toBeInstanceOf(ConflictException); // Check if error is an instance of ConflictError
+                expect(error.message);
+                expect(error.statusCode).toBe(409);
+            }
         });
     });
 
@@ -155,7 +164,7 @@ describe("UserService", () => {
             // Mock jwt.sign to return a token
             jest.spyOn(jwt, "sign").mockReturnValue("token");
 
-            const { token, status } = await userService.authenticateUser(
+            const token = await userService.authenticateUser(
                 "test@gmail.com",
                 "password"
             );
@@ -164,22 +173,24 @@ describe("UserService", () => {
                 "hashedPassword"
             );
             expect(token).toBe("token");
-            expect(status).toBe(200);
         });
 
-        it("should throw Unauthorized Error(401) if email is invalid", async () => {
+        it("should throw UnauthorizedException(401) if email is invalid", async () => {
             // Mock User.findOne to return null (indicating no user found)
             jest.spyOn(User, "findOne").mockResolvedValue(null);
 
-            const result = await userService.authenticateUser(
-                "invalid@test.com",
-                "password"
-            );
-            expect(result.error).toBe("Invalid email");
-            expect(result.status).toBe(401);
+            try {
+                await userService.authenticateUser(
+                    "invalid@test.com",
+                    "password"
+                );
+            } catch (error) {
+                expect(error.message).toBe("Invalid email");
+                expect(error.statusCode).toBe(401);
+            }
         });
 
-        it("should throw Unauthorized Error(401) if password is invalid", async () => {
+        it("should throw UnauthorizedException(401) if password is invalid", async () => {
             const mockUser = {
                 _id: "userId",
                 username: "testuser",
@@ -195,13 +206,15 @@ describe("UserService", () => {
             // Mock bcrypt.compare to return false (indicating password mismatch)
             jest.spyOn(bcrypt, "compare").mockResolvedValue(false);
 
-            const result = await userService.authenticateUser(
-                "test@test.com",
-                "wrongpassword"
-            );
-
-            expect(result.error).toBe("Invalid password");
-            expect(result.status).toBe(401);
+            try {
+                await userService.authenticateUser(
+                    "test@test.com",
+                    "wrongpassword"
+                );
+            } catch (error) {
+                expect(error.message).toBe("Invalid password");
+                expect(error.statusCode).toBe(401);
+            }
         });
     });
 
@@ -228,29 +241,32 @@ describe("UserService", () => {
             // Mock jwt.verify to succeed
             jest.spyOn(jwt, "verify").mockImplementation(() => {});
 
-            const { message, status } = await userService.verifyUser("token");
+            const user = await userService.verifyUser("token");
 
             expect(jwt.verify).toHaveBeenCalledWith(
                 "token",
                 jwt_var.secret || "lameSecret"
             );
-            expect(message).toBe("Account verified! You can now log in.");
-            expect(status).toBe(200);
+            expect(user.isActive).toBe(true);
+            expect(user.verificationToken).toBe(null);
         });
 
-        it("should throw Unauthorized Error(401) if token is invalid", async () => {
+        it("should throw UnauthorizedException(401) if token is invalid", async () => {
             // Mock User.findOne to return null (indicating no user found)
             jest.spyOn(User, "findOne").mockResolvedValue(null);
 
             // Mock jwt.verify to succeed
             jest.spyOn(jwt, "verify").mockImplementation(() => {});
 
-            const result = await userService.verifyUser("invalidtoken");
-            expect(result.error).toBe("Invalid verification token");
-            expect(result.status).toBe(401);
+            try {
+                await userService.verifyUser("invalidtoken");
+            } catch (error) {
+                expect(error.message).toBe("Invalid verification token");
+                expect(error.statusCode).toBe(401);
+            }
         });
 
-        it("should throw UnauthorizedException if jwt.verify throws an error", async () => {
+        it("should throw UnauthorizedException(401) if jwt.verify throws an error", async () => {
             // Mock jwt.verify to throw an error
             jest.spyOn(jwt, "verify").mockImplementation(() => {
                 throw new UnauthorizedException("Invalid token");
@@ -289,25 +305,22 @@ describe("UserService", () => {
                 select: jest.fn().mockResolvedValue(mockUser),
             });
 
-            const { user, status } = await userService.getUserById(
-                mockUser._id
-            );
+            const user = await userService.getUserById(mockUser._id);
 
             // Use .toEqual() to compare objects by value rather than reference
             expect(user).toEqual(mockUser);
-            expect(status).toBe(200);
         });
 
-        it("should throw NotFound Error if user not found", async () => {
+        it("should throw NotFoundException(404) if user not found", async () => {
             // Mocking the findById method to return null
             const mockId = new mongoose.Types.ObjectId().toString();
             jest.spyOn(User, "findById").mockReturnValue({
                 select: jest.fn().mockResolvedValue(null),
             });
 
-            const result = await userService.getUserById(mockId);
-            expect(result.error).toBe("User not found");
-            expect(result.status).toBe(404);
+            await expect(
+                userService.getUserById(mockId)
+            ).rejects.toBeInstanceOf(NotFoundException);
         });
     });
 
@@ -345,50 +358,53 @@ describe("UserService", () => {
                 select: jest.fn().mockResolvedValue(mockUser),
             });
 
-            const result = await userService.updateUser(mockUser._id, {
+            const user = await userService.updateUser(mockUser._id, {
                 body: updatedData,
             });
 
-            expect(result.user.username).toBe("updateduser");
-            expect(result.user.profile.firstName).toBe("Updated");
-            expect(result.user.profile.socialLinks.linkedin).toBe(
+            expect(user.username).toBe("updateduser");
+            expect(user.profile.firstName).toBe("Updated");
+            expect(user.profile.socialLinks.linkedin).toBe(
                 "https://linkedin.com/in/updated"
             );
-            expect(result.status).toBe(200);
-            expect(result.user.save).toHaveBeenCalled(); // Ensure save was called
+            expect(user.save).toHaveBeenCalled(); // Ensure save was called
         });
 
-        it("should throw NotFound Error(404) if user not found", async () => {
+        it("should throw NotFoundException(404) if user not found", async () => {
             const mockId = new mongoose.Types.ObjectId().toString();
 
             User.findById.mockReturnValue({
                 select: jest.fn().mockResolvedValue(null),
             });
 
-            const result = await userService.updateUser(mockId, {
-                body: { username: "Punks" },
-            });
-            expect(result.error).toBe("User not found");
-            expect(result.status).toBe(404);
+            await expect(
+                userService.updateUser(mockId, {
+                    body: { username: "Punks" },
+                })
+            ).rejects.toBeInstanceOf(NotFoundException);
         });
 
-        it("should throw BadRequest Error(400) if ID is not present", async () => {
-            const result = await userService.updateUser("", {
-                username: "testuser",
-            });
+        it("should throw BadRequestException(400) if ID is not present", async () => {
+            await expect(
+                userService.updateUser("", {
+                    username: "testuser",
+                })
+            ).rejects.toBeInstanceOf(BadRequestException);
 
-            expect(result.error).toBe("User ID is required");
-            expect(result.status).toBe(400);
+            // expect(result.error).toBe("User ID is required");
+            // expect(result.status).toBe(400);
         });
 
-        it("should throw BadRequest Error if body is empty", async () => {
+        it("should throw BadRequestException(400) if body is empty", async () => {
             const mockUserId = new mongoose.Types.ObjectId().toString();
-
-            const result = await userService.updateUser(mockUserId, {
-                body: {},
-            });
-            expect(result.error).toBe("No fields provided for update");
-            expect(result.status).toBe(400);
+            try {
+                await userService.updateUser(mockUserId, {
+                    body: {},
+                });
+            } catch (error) {
+                expect(error.message).toBe("No fields provided for update");
+                expect(error.statusCode).toBe(400);
+            }
         });
     });
     describe("getAllUsers", () => {
@@ -422,17 +438,19 @@ describe("UserService", () => {
                     { email: new RegExp("Doe", "i") },
                 ],
             });
-            expect(result).toEqual({ users: mockUsers, stauts: 200 });
+            expect(result).toEqual(mockUsers);
         });
 
-        it("should return error when no users match the query", async () => {
+        it("should throw NotfoundException(404) when no users match the query", async () => {
             // Mocking User.find and chaining select
             jest.spyOn(User, "find").mockReturnValue({
                 select: jest.fn().mockResolvedValue([]),
             });
-            const result = await userService.getAllUsers({
-                query: { q: "NonExistent" },
-            });
+            await expect(
+                userService.getAllUsers({
+                    query: { q: "NonExistent" },
+                })
+            ).rejects.toBeInstanceOf(NotFoundException);
 
             expect(User.find).toHaveBeenCalledWith({
                 $or: [
@@ -442,7 +460,6 @@ describe("UserService", () => {
                     { email: new RegExp("NonExistent", "i") },
                 ],
             });
-            expect(result).toEqual({ error: "No users found", stauts: 404 });
         });
 
         it("should return all users when no query is provided", async () => {
@@ -467,7 +484,7 @@ describe("UserService", () => {
             const result = await userService.getAllUsers({ query: {} });
 
             expect(User.find).toHaveBeenCalledWith({});
-            expect(result).toEqual({ users: mockUsers, stauts: 200 });
+            expect(result).toEqual(mockUsers);
         });
     });
     describe("resetVerificationEmailToken", () => {
@@ -486,7 +503,7 @@ describe("UserService", () => {
             // Mock jwt.sign to return a new token
             jest.spyOn(jwt, "sign").mockReturnValue("newtoken");
 
-            const { user } = await userService.resetVerificationEmailToken(
+            const user = await userService.resetVerificationEmailToken(
                 "test@test.com"
             );
 
@@ -494,33 +511,32 @@ describe("UserService", () => {
             expect(user).toBe(mockUser);
         });
 
-        it("should throw Error if user is not found", async () => {
+        it("should throw NotFoundException(404) if user is not found", async () => {
             // Mock User.findOne to return null
             jest.spyOn(User, "findOne").mockResolvedValue(null);
 
-            const result = await userService.resetVerificationEmailToken(
-                "nonexistent@test.com"
-            );
-            expect(result.error).toBe("User not found");
-            expect(result.status).toBe(404);
+            await expect(
+                userService.resetVerificationEmailToken("nonexistent@test.com")
+            ).rejects.toBeInstanceOf(NotFoundException);
         });
     });
 
     describe("resetPassword", () => {
-        it("should return error when user is not found", async () => {
+        it("should throw NotFoundException(404) when user is not found", async () => {
             jest.spyOn(User, "findById").mockResolvedValue(null);
 
-            const result = await userService.resetPassword({
-                userId: "nonexistentId",
-                currentPassword: "currentPassword123",
-                newPassword: "newPassword123",
-            });
+            await expect(
+                userService.resetPassword({
+                    userId: "nonexistentId",
+                    currentPassword: "currentPassword123",
+                    newPassword: "newPassword123",
+                })
+            ).rejects.toBeInstanceOf(NotFoundException);
 
             expect(User.findById).toHaveBeenCalledWith("nonexistentId");
-            expect(result).toEqual({ error: "User not found", staut: 404 });
         });
 
-        it("should return error when current password is incorrect", async () => {
+        it("should throw BadRequesstException(400) when current password is incorrect", async () => {
             const mockUser = {
                 _id: "userId123",
                 password: "hashedPassword123",
@@ -529,21 +545,19 @@ describe("UserService", () => {
             jest.spyOn(User, "findById").mockResolvedValue(mockUser);
             jest.spyOn(bcrypt, "compare").mockResolvedValue(false); // Passwords don't match
 
-            const result = await userService.resetPassword({
-                userId: "userId123",
-                currentPassword: "wrongPassword",
-                newPassword: "newPassword123",
-            });
+            await expect(
+                userService.resetPassword({
+                    userId: "userId123",
+                    currentPassword: "wrongPassword",
+                    newPassword: "newPassword123",
+                })
+            ).rejects.toBeInstanceOf(BadRequestException);
 
             expect(User.findById).toHaveBeenCalledWith("userId123");
             expect(bcrypt.compare).toHaveBeenCalledWith(
                 "wrongPassword",
                 mockUser.password
             );
-            expect(result).toEqual({
-                error: "Current password is incorrect",
-                staut: 400,
-            });
         });
 
         it("should successfully reset password when current password is correct", async () => {
@@ -558,7 +572,7 @@ describe("UserService", () => {
             jest.spyOn(bcrypt, "compare").mockResolvedValue(true); // Passwords match
             jest.spyOn(bcrypt, "hash").mockResolvedValue("newHashedPassword");
 
-            const result = await userService.resetPassword({
+            const user = await userService.resetPassword({
                 userId: "userId123",
                 currentPassword: "currentPassword123",
                 newPassword: "newPassword123",
@@ -572,23 +586,21 @@ describe("UserService", () => {
             expect(bcrypt.hash).toHaveBeenCalledWith("newPassword123", 10); // Hash the new password
             expect(mockUser.password).toBe("newHashedPassword"); // Password should now be updated
             expect(mockUser.save).toHaveBeenCalled(); // Ensure save is called
-            expect(result).toEqual({ user: mockUser, status: 201 });
+            expect(user).toEqual(mockUser);
         });
     });
     describe("requestPasswordReset", () => {
-        it("should return error when user with the given email does not exist", async () => {
+        it("should throw NotFoundException(404) when user with the given email does not exist", async () => {
             jest.spyOn(User, "findOne").mockResolvedValue(null);
 
-            const result = await userService.requestPasswordReset({
-                email: "nonexistent@example.com",
-            });
+            await expect(
+                userService.requestPasswordReset({
+                    email: "nonexistent@example.com",
+                })
+            ).rejects.toBeInstanceOf(NotFoundException);
 
             expect(User.findOne).toHaveBeenCalledWith({
                 email: "nonexistent@example.com",
-            });
-            expect(result).toEqual({
-                error: "User with this email does not exist",
-                status: 404,
             });
         });
 
@@ -603,7 +615,7 @@ describe("UserService", () => {
             jest.spyOn(User, "findOne").mockResolvedValue(mockUser);
 
             // Perform the operation
-            const result = await userService.requestPasswordReset({
+            const resetToken = await userService.requestPasswordReset({
                 email: "existinguser@example.com",
             });
 
@@ -613,11 +625,11 @@ describe("UserService", () => {
             });
             expect(mockUser.resetPasswordToken).not.toBeNull(); // Ensure the token was generated and set
             expect(mockUser.save).toHaveBeenCalled();
-            expect(result.resetToken).toBe(mockUser.resetPasswordToken); // The returned token should match the user's reset token
+            expect(resetToken).toBe(mockUser.resetPasswordToken); // The returned token should match the user's reset token
         });
     });
     describe("resetPasswordViaEmail", () => {
-        it("should return error when user is not found", async () => {
+        it("should throw NotFoundException(404) when user is not found", async () => {
             const decodedToken = { email: "nonexistent@example.com" };
 
             // Mock jwt.verify to return a decoded token
@@ -626,10 +638,12 @@ describe("UserService", () => {
             // Mock User.findOne to return null (user not found)
             jest.spyOn(User, "findOne").mockResolvedValue(null);
 
-            const result = await userService.resetPasswordViaEmail({
-                token: "validToken",
-                newPassword: "newPassword123",
-            });
+            await expect(
+                userService.resetPasswordViaEmail({
+                    token: "validToken",
+                    newPassword: "newPassword123",
+                })
+            ).rejects.toBeInstanceOf(NotFoundException);
 
             expect(jwt.verify).toHaveBeenCalledWith(
                 "validToken",
@@ -638,7 +652,6 @@ describe("UserService", () => {
             expect(User.findOne).toHaveBeenCalledWith({
                 email: "nonexistent@example.com",
             });
-            expect(result).toEqual({ error: "User not found", status: 404 });
         });
 
         it("should successfully reset password when user is found", async () => {
@@ -675,7 +688,7 @@ describe("UserService", () => {
             expect(mockUser.password).toBe("newHashedPassword");
             expect(mockUser.resetPasswordToken).toBeNull();
             expect(mockUser.save).toHaveBeenCalled();
-            expect(result).toEqual({ user: mockUser, status: 201 });
+            expect(result).toEqual(mockUser);
         });
     });
 });
