@@ -1,21 +1,14 @@
-import App from "../src/app.js";
-import { MongoMemoryServer } from "mongodb-memory-server";
+// jest.setup.js
+
 import mongoose from "mongoose";
-import seedUsers from "../seed/user.seed.js";
+import nodemailer from "nodemailer";
+beforeAll(async () => {});
+beforeEach(async () => {
+    nodemailer.createTransport.mockClear();
+});
 
-let mongoServer;
-let appInstance;
-
-beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-
-    // Override the MongoDB connection URL for testing
-
-    appInstance = new App();
-    global.app = appInstance.app;
-    await appInstance.connectToDatabase(mongoUri);
-    await seedUsers();
+afterEach(() => {
+    jest.clearAllMocks(); // Clear mocks after each test
 });
 
 afterAll(async () => {
@@ -24,8 +17,8 @@ afterAll(async () => {
     for (let key in collections) {
         await collections[key].deleteMany();
     }
-    await appInstance.disconnectDatabase();
-    await mongoServer.stop();
-});
+    // await appInstance.disconnectDatabase();
+    // await mongoServer.stop();
 
-beforeEach(async () => {});
+    jest.resetModules(); // Resets the module registry
+});
