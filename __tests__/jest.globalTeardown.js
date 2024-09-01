@@ -7,7 +7,6 @@ export default async () => {
         await collections[key].deleteMany();
     }
 
-    
     // Disconnect the application from the database
     await mongoose.disconnect();
     if (mongoose.connection.readyState !== 0) {

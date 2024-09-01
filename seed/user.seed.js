@@ -1,3 +1,5 @@
+// user.seed.js
+
 import bcrypt from "bcrypt";
 import { User } from "../src/users/user.model.js";
 import mongoose from "mongoose";
