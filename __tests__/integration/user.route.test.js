@@ -5,9 +5,6 @@ import fs from "fs";
 import path from "path";
 import seedUsers from "../../seed/user.seed.js";
 import App from "../../src/app.js";
-// Ensure nodemailer is properly mocked
-
-// jest.mock("nodemailer");
 
 // Mock `fs` methods to prevent actual file system operations
 jest.spyOn(fs, "existsSync").mockReturnValue(true); // Pretend the uploads directory exists
