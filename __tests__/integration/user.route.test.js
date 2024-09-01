@@ -4,25 +4,10 @@ import EmailService from "../../src/service/email.service.js";
 import fs from "fs";
 import path from "path";
 import seedUsers from "../../seed/user.seed.js";
+import App from "../../src/app.js";
 // Ensure nodemailer is properly mocked
 
-jest.mock("multer", () => {
-    return jest.fn(() => {
-        return {
-            single: jest.fn(() => (req, res, next) => {
-                req.file = {
-                    filename: "mocked-image.jpg",
-                    originalname: "test-image.jpg",
-                    mimetype: "image/jpeg",
-                    size: 1024,
-                };
-                next();
-            }),
-        };
-    });
-});
-
-jest.mock("nodemailer");
+// jest.mock("nodemailer");
 
 // Mock `fs` methods to prevent actual file system operations
 jest.spyOn(fs, "existsSync").mockReturnValue(true); // Pretend the uploads directory exists
@@ -31,26 +16,18 @@ jest.spyOn(fs, "mkdirSync").mockImplementation(() => {}); // Prevent actual dire
 
 let token;
 let mockSendMail;
+let app;
 beforeAll(async () => {
+    mockSendMail = nodemailer.createTransport().sendMail;
+    await seedUsers();
+
+    app = new App().app;
     // await seedtags();
-    mockSendMail = jest.fn().mockResolvedValue(true);
 
-    nodemailer.createTransport.mockReturnValue({
-        sendMail: mockSendMail,
-    });
-
-    // jest.spyOn(nodemailer, "createTransport").mockReturnValue({
+    // nodemailer.createTransport.mockReturnValue({
     //     sendMail: mockSendMail,
     // });
-    jest.spyOn(EmailService, "getTransporter").mockResolvedValue(() => {
-        return nodemailer.createTransport.mockReturnValue({
-            sendMail: mockSendMail,
-        });
-    });
-
-    await seedUsers();
 });
-
 describe("User Module E2E Tests", () => {
     describe("POST: api/users/signup", () => {
         it("should sign up a new user successfully", async () => {
@@ -79,7 +56,7 @@ describe("User Module E2E Tests", () => {
                 });
             });
 
-            const response = await request(global.app)
+            const response = await request(app)
                 .post("/api/users/signup")
                 .send(mockUser);
 
@@ -100,7 +77,7 @@ describe("User Module E2E Tests", () => {
         });
 
         it("should not sign up a user with existing email", async () => {
-            await request(global.app)
+            await request(app)
                 .post("/api/users/signup")
                 .send({
                     username: "testuser1",
@@ -112,7 +89,7 @@ describe("User Module E2E Tests", () => {
                     },
                 });
 
-            const response = await request(global.app)
+            const response = await request(app)
                 .post("/api/users/signup")
                 .send({
                     username: "testuser2",
@@ -132,12 +109,10 @@ describe("User Module E2E Tests", () => {
     });
     describe("POST: api/users/login", () => {
         it("should log in an existing user successfully", async () => {
-            const response = await request(global.app)
-                .post("/api/users/login")
-                .send({
-                    email: "admin@gmail.com",
-                    password: "admin123",
-                });
+            const response = await request(app).post("/api/users/login").send({
+                email: "admin@gmail.com",
+                password: "admin123",
+            });
 
             expect(response.status).toBe(200);
             expect(response.body.token).toBeDefined();
@@ -148,7 +123,7 @@ describe("User Module E2E Tests", () => {
 
     describe("GET: api/users/me", () => {
         it("should fetch the user profile successfully", async () => {
-            const response = await request(global.app)
+            const response = await request(app)
                 .get("/api/users/me")
                 .set("Authorization", `Bearer ${token}`);
             expect(response.status).toBe(200);
@@ -158,7 +133,7 @@ describe("User Module E2E Tests", () => {
     });
     describe("PATCH: api/users/me", () => {
         it("should update the user profile successfully", async () => {
-            const response = await request(global.app)
+            const response = await request(app)
                 .patch("/api/users/me")
                 .set("Authorization", `Bearer ${token}`)
                 .send({
@@ -190,7 +165,7 @@ describe("User Module E2E Tests", () => {
                 });
             });
 
-            const response = await request(global.app)
+            const response = await request(app)
                 .post("/api/users/request-password-reset")
                 .send({
                     email: "contributor@example.com",
@@ -215,7 +190,7 @@ describe("User Module E2E Tests", () => {
 
     describe("POST: api/users/change-password", () => {
         it("should change the user password successfully", async () => {
-            const response = await request(global.app)
+            const response = await request(app)
                 .post("/api/users/change-password")
                 .set("Authorization", `Bearer ${token}`)
                 .send({
@@ -227,12 +202,10 @@ describe("User Module E2E Tests", () => {
             expect(response.text).toBe("Password changed successfully");
         });
         it("should log in with the new password successfully", async () => {
-            const response = await request(global.app)
-                .post("/api/users/login")
-                .send({
-                    email: "admin@gmail.com",
-                    password: "newpassword123",
-                });
+            const response = await request(app).post("/api/users/login").send({
+                email: "admin@gmail.com",
+                password: "newpassword123",
+            });
 
             expect(response.status).toBe(200);
             expect(response.body.token).toBeDefined();
@@ -257,7 +230,7 @@ describe("User Module E2E Tests", () => {
                                <a href="your-verification-link?token=${user.verificationToken}">Verify Email</a>`,
                 });
             });
-            const response = await request(global.app)
+            const response = await request(app)
                 .post("/api/users/resend-verification-email")
                 .send({
                     email: "random@example.com",
@@ -303,7 +276,7 @@ describe("User Module E2E Tests", () => {
     describe("GET: api/users", () => {
         it("should fetch all users successfully (admin only)", async () => {
             // Assuming the testuser is an admin
-            const response = await request(global.app)
+            const response = await request(app)
                 .get("/api/users")
                 .set("Authorization", `Bearer ${token}`);
 
@@ -314,7 +287,7 @@ describe("User Module E2E Tests", () => {
 
     describe("POST: api/users/me/photo", () => {
         it("should upload user profile photo successfully", async () => {
-            const response = await request(global.app)
+            const response = await request(app)
                 .post("/api/users/me/photo")
                 .set("Authorization", `Bearer ${token}`)
                 .attach(

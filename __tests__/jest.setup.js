@@ -1,15 +1,9 @@
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
-jest.mock("nodemailer");
-beforeAll(async () => {
-    // await seedtags();
-    const mockSendMail = jest.fn().mockResolvedValue(true);
-
-    nodemailer.createTransport.mockReturnValue({
-        sendMail: mockSendMail,
-    });
+beforeAll(async () => {});
+beforeEach(async () => {
+    nodemailer.createTransport.mockClear();
 });
-beforeEach(async () => {});
 
 afterEach(() => {
     jest.clearAllMocks(); // Clear mocks after each test
