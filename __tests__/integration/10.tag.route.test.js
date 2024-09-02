@@ -1,9 +1,17 @@
 import request from "supertest";
+import App from "../../src/app.js";
+import seedtags from "../../seed/tags.seed.js";
+let tagId;
+let app;
+beforeAll(async () => {
+    app = new App().app;
+    await seedtags();
+});
+
 describe("Tag Module E2E Tests", () => {
-    let tagId;
     describe("POST: api/tags", () => {
         it("should create a new tag", async () => {
-            const res = await request(global.app)
+            const res = await request(app)
                 .post("/api/tags")
                 .send({ name: "test-tag" });
 
@@ -15,18 +23,18 @@ describe("Tag Module E2E Tests", () => {
     });
     describe("GET: api/tags", () => {
         it("should get all tags", async () => {
-            const res = await request(global.app).get("/api/tags");
+            const res = await request(app).get("/api/tags");
 
             expect(res.status).toBe(200);
             expect(Array.isArray(res.body)).toBe(true);
-            expect(res.body.length).toBe(1);
-            expect(res.body[0].name).toBe("test-tag");
+            const hasTestTag = res.body.some((tag) => tag.name === "test-tag");
+            expect(hasTestTag).toBe(true);
         });
     });
 
     describe("GET: api/tags/:id", () => {
         it("should get a tag by ID", async () => {
-            const res = await request(global.app).get(`/api/tags/${tagId}`);
+            const res = await request(app).get(`/api/tags/${tagId}`);
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveProperty("_id");
@@ -35,7 +43,7 @@ describe("Tag Module E2E Tests", () => {
     });
     describe("PUT: api/tags/:id", () => {
         it("should update a tag by ID", async () => {
-            const res = await request(global.app)
+            const res = await request(app)
                 .put(`/api/tags/${tagId}`)
                 .send({ name: "updated-tag" });
 
@@ -47,7 +55,7 @@ describe("Tag Module E2E Tests", () => {
 
     describe("DELETE: api/tags/:id", () => {
         it("should delete a tag by ID", async () => {
-            const res = await request(global.app).delete(`/api/tags/${tagId}`);
+            const res = await request(app).delete(`/api/tags/${tagId}`);
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveProperty(
@@ -55,7 +63,7 @@ describe("Tag Module E2E Tests", () => {
                 "Tag deleted successfully"
             );
 
-            const getRes = await request(global.app).get(`/api/tags/${tagId}`);
+            const getRes = await request(app).get(`/api/tags/${tagId}`);
             expect(getRes.status).toBe(404);
             expect(getRes.body).toHaveProperty("error", "Tag not found");
         });

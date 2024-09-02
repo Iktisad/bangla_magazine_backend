@@ -51,7 +51,7 @@ class DIContainer {
         //     this.services.categoryService
         // );
         this.controllers.tagController = new TagController(
-            this.services.categoryService
+            this.services.tagService
         );
     }
 

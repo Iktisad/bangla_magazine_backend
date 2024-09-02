@@ -10,25 +10,25 @@ export default class TagController {
         this.deleteTag = this.deleteTag.bind(this);
     }
 
-    async createTag(req, res) {
+    async createTag(req, res, next) {
         try {
             const tag = await this.tagService.create(req.body);
-            res.status(201).json(tag);
+            return res.status(201).json(tag);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            return res.status(400).json({ error: error.message });
         }
     }
 
-    async getAllTags(req, res) {
+    async getAllTags(req, res, next) {
         try {
             const tags = await this.tagService.findAll();
-            res.status(200).json(tags);
+            return res.status(200).json(tags);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            return res.status(400).json({ error: error.message });
         }
     }
 
-    async getTagById(req, res) {
+    async getTagById(req, res, next) {
         try {
             const tag = await this.tagService.findById(req.params.id);
             if (!tag) {
@@ -36,31 +36,33 @@ export default class TagController {
             }
             res.status(200).json(tag);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            return res.status(400).json({ error: error.message });
         }
     }
 
-    async updateTag(req, res) {
+    async updateTag(req, res, next) {
         try {
             const tag = await this.tagService.update(req.params.id, req.body);
             if (!tag) {
                 return res.status(404).json({ error: "Tag not found" });
             }
-            res.status(200).json(tag);
+            return res.status(200).json(tag);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            return res.status(400).json({ error: error.message });
         }
     }
 
-    async deleteTag(req, res) {
+    async deleteTag(req, res, next) {
         try {
             const tag = await this.tagService.delete(req.params.id);
             if (!tag) {
                 return res.status(404).json({ error: "Tag not found" });
             }
-            res.status(200).json({ message: "Tag deleted successfully" });
+            return res
+                .status(200)
+                .json({ message: "Tag deleted successfully" });
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            return res.status(400).json({ error: error.message });
         }
     }
 }
