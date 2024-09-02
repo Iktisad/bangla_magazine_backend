@@ -28,6 +28,7 @@ class DIContainer {
         // this.services.categoryService = new CategoryService();
         this.services.tagService = new TagService();
         this.services.userService = new UserService();
+        // this.services.categoryService = new CategoryService();
         // this.services.articleService = new ArticleService();
         // this.services.artworkService = new ArtworkService();
         // this.services.podcastService = new PodcastService();

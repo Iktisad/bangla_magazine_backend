@@ -35,13 +35,13 @@ export default class App {
             "/api/tags",
             tagRoutes(di_container.getController("tagController"))
         );
+        this.app.use(
+            "/api/article-category",
+            categoryRoutes(di_container.getController("categoryController"))
+        );
         // this.app.use(
         //     '/api/articles',
         //     articleRoutes(di_container.getController('articleController'))
-        // );
-        // this.app.use(
-        //     '/api/article-category',
-        //     categoryRoutes(di_container.getController('categoryController'))
         // );
         // this.app.use(
         //     '/api/podcast',

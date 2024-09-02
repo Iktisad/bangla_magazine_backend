@@ -1,3 +1,8 @@
+import {
+    BadRequestException,
+    NotFoundException,
+} from "../../exceptions/http.exception.js";
+
 export default class GenericService {
     constructor(model) {
         this.model = model;
@@ -5,49 +10,52 @@ export default class GenericService {
 
     // Create a new document
     async create(data) {
-        try {
-            const document = new this.model(data);
-            return await document.save();
-        } catch (error) {
-            throw new Error("Error creating document: " + error.message);
+        // Handle array input
+        if (Array.isArray(data)) {
+            if (data.length > 1) {
+                // Ensure all elements are valid objects
+                if (!data.every((item) => typeof item === "object")) {
+                    throw new BadRequestException(
+                        "Invalid data format in array."
+                    );
+                }
+                return await this.model.insertMany(data);
+            } else if (data.length === 1) {
+                // Destructure single element array
+                [data] = data;
+            }
         }
+        const document = new this.model(data);
+        return await document.save();
     }
 
     // Find a document by ID
     async findById(id) {
-        try {
-            return await this.model.findById(id);
-        } catch (error) {
-            throw new Error("Error finding document: " + error.message);
-        }
+        const document = await this.model.findById(id);
+        if (!document) throw new NotFoundException();
+        return document;
     }
 
     // Find all documents or filter by a query
     async findAll(query = {}) {
-        try {
-            return await this.model.find(query);
-        } catch (error) {
-            throw new Error("Error finding documents: " + error.message);
-        }
+        const document = await this.model.find(query);
+        if (!document) throw new NotFoundException();
+        return document;
     }
 
     // Update a document by ID
     async update(id, updateData) {
-        try {
-            return await this.model.findByIdAndUpdate(id, updateData, {
-                new: true,
-            });
-        } catch (error) {
-            throw new Error("Error updating document: " + error.message);
-        }
+        const document = await this.model.findByIdAndUpdate(id, updateData, {
+            new: true,
+        });
+        if (!document) throw new NotFoundException();
+        return document;
     }
 
     // Delete a document by ID
     async delete(id) {
-        try {
-            return await this.model.findByIdAndDelete(id);
-        } catch (error) {
-            throw new Error("Error deleting document: " + error.message);
-        }
+        const document = await this.model.findByIdAndDelete(id);
+        if (!document) throw new NotFoundException();
+        return document;
     }
 }
