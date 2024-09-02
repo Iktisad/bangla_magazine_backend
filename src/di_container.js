@@ -32,9 +32,7 @@ class DIContainer {
 
     initControllers() {
         this.controllers.userController = new UserController(
-            this.services.userService,
-            this.services.emailService,
-            this.services.photoService
+            this.services.userService
         );
 
         // this.controllers.articleController = new ArticleController(
