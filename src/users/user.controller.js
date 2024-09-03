@@ -8,7 +8,7 @@ import logger from "../service/logger.service.js";
 import EmailService from "../service/email.service.js";
 import PhotoService from "../service/photo.service.js";
 
-export class UserController {
+export default class UserController {
     constructor(UserService) {
         this.userService = UserService;
         //binding all the methods to keep the context relevant

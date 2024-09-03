@@ -16,58 +16,73 @@ A backend service for managing the diverse content of the Bangla Web Magazine, i
 
 Follow these steps to set up the project locally:
 
-1. **Clone the repository:**
+1.  **Clone the repository:**
 
     ```bash
     git clone https://github.com/Iktisad/bangla_magazine_backend.git
     ```
 
-2. **Navigate to the project directory:**
+2.  **Navigate to the project directory:**
 
     ```bash
     cd bangla_magazine_backend
     ```
 
-3. **Install dependencies:**
+3.  **Install dependencies:**
 
     ```bash
     npm install
     ```
 
-4. **Set up your environment variables:**
+4.  **Set up your environment variables:**
 
-    Create a `.env` file in the root directory of the project with the following content:
+    **LOCAL DEVELOPMENT**
+
+    ***
+
+    Create a `.env.development.local` file in the root directory of the project with the following content:
 
     ```plaintext
-    # .env
+    # .env.development.local
 
-    # Application Port
+    # Application
+
+    PORT=3001
+    APP_HOST=http://localhost
+
+    # Database
+
     ## Development
-    PORT=3000
-    # Access at http://localhost:3000
 
-    ## Production
-    PORT=5212
-    BASE_URL=to_be_announced
-
-    # Database Connection
-    ## Development
-    DB_HOST=localhost
     DB_PORT=27017
-
-    ## Production
     DB_NAME=bangla_web_magazine
-    DB_HOST=to_be_announced
-    DB_PORT=to_be_announced
-    DB_USER=your_username
-    DB_PASS=your_password
+    DB_HOST=localhost
 
-    # JWT Secret for Authentication
-    JWT_SECRET=your_jwt_secretkey
+    # JWT for authentication
 
-    # Other Environment Variables
-    NODE_ENV=development
+    JWT_SECRET=SET_AS_YOU_LIKE
+    JWT_EXPIRATION=4h
+
+    # Nodemailer Configurations
+
+    MAILER_EMAIL=example@example.com
+    MAILER_PASSWORD=secret
+    MAILER_SERVICE=Example
+    MAILER_HOST=smtp.mail.example.com
+    MAILER_PORT=465
+    MAILER_SECURE=false
+    MAILER_LOGGER=true
     ```
+
+    ***
+
+    **PRODCUTION DEVELOPMENT**
+
+    ***
+
+    Create a `.env` or `env.production.local` file in the root directory of the project with the following content as above and set the links appropriately.
+
+    ***
 
 ## 🚀 Usage
 

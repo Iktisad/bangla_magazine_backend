@@ -9,7 +9,7 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from "../exceptions/http.exception.js";
-export class UserService {
+export default class UserService {
     async createUser(body) {
         const { username, email, password, profile } = body;
 
