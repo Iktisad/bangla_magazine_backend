@@ -1,2 +1,36 @@
-@port=3001
-@api=http://localhost:{{port}}/api/tags
+@port = 3001
+@api = http://localhost:{{port}}/api/tags
+
+### Create Tags
+POST {{api}}
+Content-Type: application/json
+
+{
+    "hashtags": ["#HealthCare", "#technology_hub"]
+}
+
+###
+
+### Get All Tags
+GET {{api}}
+
+###
+
+### Get a Tag by ID
+GET {{api}}/:id
+
+###
+
+### Update a Tag by ID
+PUT {{api}}/:id
+Content-Type: application/json
+
+{
+    "hashtags": { "name" : "#UpdatedTag" }
+}
+
+###
+
+### Delete a Tag by ID
+DELETE {{api}}/:id
+

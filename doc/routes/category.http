@@ -1,2 +1,49 @@
-@port=3001
-@api=http://localhost:{{port}}/api/categories
+@port = 3001
+@api = http://localhost:{{port}}/api/categories
+
+### Create a new Category
+POST {{api}}
+Content-Type: application/json
+
+{
+    "category": ["Health", "Technology"]
+}
+
+###
+
+### Get All Categories
+GET {{api}}
+
+###
+
+### Get a Category by ID
+GET {{api}}/:id
+
+### Example:
+GET {{api}}/1
+
+###
+
+### Update a Category by ID
+PUT {{api}}/:id
+Content-Type: application/json
+
+{
+    "category": ["Updated Health"]
+}
+
+### Example:
+PUT {{api}}/1
+Content-Type: application/json
+
+{
+    "category": ["Updated Health"]
+}
+
+###
+
+### Delete a Category by ID
+DELETE {{api}}/:id
+
+### Example:
+DELETE {{api}}/1

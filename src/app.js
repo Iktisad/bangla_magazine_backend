@@ -4,7 +4,7 @@ import di_container from "./di_container.js";
 import userRoutes from "./users/user.routes.js";
 import tagRoutes from "./magazine/tag/tag.routes.js";
 // import articleRoutes from './src/magazine/article/article.routes.js';
-// import categoryRoutes from './src/magazine/category/category.routes.js';
+import categoryRoutes from "./magazine/category/category.routes.js";
 // import podcastRoutes from './src/podcast/podcast.routes.js';
 import { errorLogger, requestLogger } from "./middleware/logger.middleware.js";
 import logger from "./service/logger.service.js";
@@ -36,7 +36,7 @@ export default class App {
             tagRoutes(di_container.getController("tagController"))
         );
         this.app.use(
-            "/api/article-category",
+            "/api/category",
             categoryRoutes(di_container.getController("categoryController"))
         );
         // this.app.use(

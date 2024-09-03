@@ -12,7 +12,9 @@ export default class CategoryController {
 
     async createCategory(req, res) {
         try {
-            const category = await this.categoryService.create(req.body);
+            const category = await this.categoryService.create(
+                req.body.category
+            );
             res.status(201).json(category);
         } catch (error) {
             res.status(400).json({ error: error.message });

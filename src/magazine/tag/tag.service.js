@@ -11,7 +11,6 @@ export default class TagService extends GenericService {
         super(Tag); // Pass the Tag model to the generic service
     }
     async create(tags) {
-        
         // Step 1: Find all existing tags in one query
         const existingTags = await Tag.find({ name: { $in: tags } });
         const existingTagNames = existingTags.map((tag) => tag.name);

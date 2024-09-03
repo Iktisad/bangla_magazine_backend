@@ -1,7 +1,7 @@
 import {
     ConflictException,
     NotFoundException,
-} from "../../exceptions/http.exception";
+} from "../../exceptions/http.exception.js";
 import logger from "../../service/logger.service.js";
 export default class TagController {
     constructor(tagService) {
@@ -17,7 +17,7 @@ export default class TagController {
 
     async createTag(req, res, next) {
         try {
-            const tags = await this.tagService.create(req.body);
+            const tags = await this.tagService.create(req.body.hashtags);
 
             return res
                 .status(201)
