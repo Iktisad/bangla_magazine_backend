@@ -27,10 +27,6 @@ export default class App {
             "/api/users",
             userRoutes(di_container.getController("userController"))
         );
-        // this.app.use(
-        //     "/api/categories",
-        //     userRoutes(di_container.getController("categoryController"))
-        // );
         this.app.use(
             "/api/tags",
             tagRoutes(di_container.getController("tagController"))

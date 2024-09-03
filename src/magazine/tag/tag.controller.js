@@ -19,19 +19,7 @@ export default class TagController {
         try {
             const tags = await this.tagService.create(req.body.hashtags);
 
-            return res
-                .status(201)
-                .send(
-                    `${
-                        tags.existingTags.length > 0
-                            ? "Existing Tags:" + tags.existingTags.toString()
-                            : ""
-                    } <br> ${
-                        tags.newTags.length > 0
-                            ? "New Tags Created: " + tags.newTags.toString()
-                            : ""
-                    }`
-                );
+            return res.status(201).json(tags);
         } catch (error) {
             if (error instanceof ConflictException) {
                 logger.warn(error.message);

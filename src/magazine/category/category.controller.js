@@ -1,3 +1,8 @@
+import {
+    ConflictException,
+    NotFoundException,
+} from "../../exceptions/http.exception";
+
 export default class CategoryController {
     constructor(categoryService) {
         this.categoryService = categoryService;
@@ -10,62 +15,80 @@ export default class CategoryController {
         this.deleteCategory = this.deleteCategory.bind(this);
     }
 
-    async createCategory(req, res) {
+    async createCategory(req, res, next) {
         try {
             const category = await this.categoryService.create(
                 req.body.category
             );
-            res.status(201).json(category);
+            return res.status(201).json(category);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            if (error instanceof ConflictException)
+                return res
+                    .status(error.statusCode)
+                    .json({ error: error.message });
+            next(error);
         }
     }
 
-    async getAllCategories(req, res) {
+    async getAllCategories(req, res, next) {
         try {
             const categories = await this.categoryService.findAll();
-            res.status(200).json(categories);
+            return res.status(200).json(categories);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            next(error);
         }
     }
 
-    async getCategoryById(req, res) {
+    async getCategoryById(req, res, next) {
         try {
             const category = await this.categoryService.findById(req.params.id);
-            if (!category) {
-                return res.status(404).json({ error: "Category not found" });
-            }
-            res.status(200).json(category);
+
+            return res.status(200).json(category);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            if (error instanceof NotFoundException) {
+                error.message = "Category not found";
+                return res
+                    .status(error.statusCode)
+                    .json({ error: error.message });
+            }
+            next(error);
         }
     }
 
-    async updateCategory(req, res) {
+    async updateCategory(req, res, next) {
         try {
             const category = await this.categoryService.update(
                 req.params.id,
-                req.body
+                req.body.category
             );
-            if (!category) {
-                return res.status(404).json({ error: "Category not found" });
-            }
-            res.status(200).json(category);
+
+            return res.status(200).json(category);
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            if (error instanceof NotFoundException) {
+                error.message = "Category not found";
+                return res
+                    .status(error.statusCode)
+                    .json({ error: error.message });
+            }
+            next(error);
         }
     }
 
-    async deleteCategory(req, res) {
+    async deleteCategory(req, res, next) {
         try {
             const category = await this.categoryService.delete(req.params.id);
-            if (!category) {
-                return res.status(404).json({ error: "Category not found" });
-            }
-            res.status(200).json({ message: "Category deleted successfully" });
+
+            return res
+                .status(200)
+                .json({ message: "Category deleted successfully", category });
         } catch (error) {
-            res.status(400).json({ error: error.message });
+            if (error instanceof NotFoundException) {
+                error.message = "Category not found";
+                return res
+                    .status(error.statusCode)
+                    .json({ error: error.message });
+            }
+            next(error);
         }
     }
 }

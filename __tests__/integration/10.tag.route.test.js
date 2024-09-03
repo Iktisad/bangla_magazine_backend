@@ -8,17 +8,16 @@ beforeAll(async () => {
     await seedtags();
 });
 
-describe("Tag Module E2E Tests", () => {
+describe("Tag E2E Tests", () => {
     describe("POST: api/tags", () => {
         it("should create a new tag", async () => {
             const res = await request(app)
                 .post("/api/tags")
-                .send({ name: "test-tag" });
-
+                .send({ hashtags: ["test-tag"] });
             expect(res.status).toBe(201);
-            expect(res.body).toHaveProperty("_id");
-            expect(res.body.name).toBe("test-tag");
-            tagId = res.body._id; // Save the tag ID for later use
+            expect(res.body.newTags[0]).toHaveProperty("_id");
+            expect(res.body.newTags[0].name).toBe("#TestTag");
+            tagId = res.body.newTags[0]._id; // Save the tag ID for later use
         });
     });
     describe("GET: api/tags", () => {
@@ -27,7 +26,7 @@ describe("Tag Module E2E Tests", () => {
 
             expect(res.status).toBe(200);
             expect(Array.isArray(res.body)).toBe(true);
-            const hasTestTag = res.body.some((tag) => tag.name === "test-tag");
+            const hasTestTag = res.body.some((tag) => tag.name === "#TestTag");
             expect(hasTestTag).toBe(true);
         });
     });
@@ -38,7 +37,7 @@ describe("Tag Module E2E Tests", () => {
 
             expect(res.status).toBe(200);
             expect(res.body).toHaveProperty("_id");
-            expect(res.body.name).toBe("test-tag");
+            expect(res.body.name).toBe("#TestTag");
         });
     });
     describe("PUT: api/tags/:id", () => {
