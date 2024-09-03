@@ -43,62 +43,46 @@ Follow these steps to set up the project locally:
     Create a `.env.development.local` file in the root directory of the project with the following content:
 
     ```plaintext
-        # .env.development.local
+    # .env.development.local
 
-        # Application
+    # Application
 
-        PORT=3001
-        APP_HOST=http://localhost
+    PORT=3001
+    APP_HOST=http://localhost
 
-        # Database
+    # Database
 
-        ## Development
+    ## Development
 
-        DB_PORT=27017
-        DB_NAME=bangla_web_magazine
-        DB_HOST=localhost
+    DB_PORT=27017
+    DB_NAME=bangla_web_magazine
+    DB_HOST=localhost
 
-        # JWT for authentication
+    # JWT for authentication
 
-        JWT_SECRET=SET_AS_YOU_LIKE
-        JWT_EXPIRATION=4h
+    JWT_SECRET=SET_AS_YOU_LIKE
+    JWT_EXPIRATION=4h
 
-        # Nodemailer Configurations
+    # Nodemailer Configurations
 
-        MAILER_EMAIL=example@example.com
-        MAILER_PASSWORD=secret
-        MAILER_SERVICE=Example
-        MAILER_HOST=smtp.mail.example.com
-        MAILER_PORT=465
-        MAILER_SECURE=false
-        MAILER_LOGGER=true
+    MAILER_EMAIL=example@example.com
+    MAILER_PASSWORD=secret
+    MAILER_SERVICE=Example
+    MAILER_HOST=smtp.mail.example.com
+    MAILER_PORT=465
+    MAILER_SECURE=false
+    MAILER_LOGGER=true
     ```
 
     ***
 
-    Create a `.env` or `env.production.local` file in the root directory of the project with the following content:
+    **PRODCUTION DEVELOPMENT**
 
-    ```plaintext
-    # .env
+    ***
 
-    # Application Port
-    PORT=SET_PORT
-    BASE_URL=http://HOST_LINK_EXAMPLE
+    Create a `.env` or `env.production.local` file in the root directory of the project with the following content as above and set the links appropriately.
 
-    # Database Connection
-    ## Development
-    DB_HOST=REMOTE_LINK
-    DB_PORT=PORT
-
-    DB_NAME=bangla_web_magazine
-    DB_HOST=REMOTE_HOST_NAME
-    DB_PORT=REMOTE_PORT
-    DB_USER=USER_NAME
-    DB_PASS=PASSWORD
-
-    # JWT Secret for Authentication
-    JWT_SECRET=JWT_SECRET_KEY
-    ```
+    ***
 
 ## 🚀 Usage
 
