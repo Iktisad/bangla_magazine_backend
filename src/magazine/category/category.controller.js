@@ -1,7 +1,7 @@
 import {
     ConflictException,
     NotFoundException,
-} from "../../exceptions/http.exception";
+} from "../../exceptions/http.exception.js";
 
 export default class CategoryController {
     constructor(categoryService) {
