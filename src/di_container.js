@@ -1,5 +1,5 @@
-import { UserService } from "./users/user.service.js";
-import { UserController } from "./users/user.controller.js";
+import UserService from "./users/user.service.js";
+import UserController from "./users/user.controller.js";
 // import { ArticleService } from "./magazine/article/article.service.js";
 // import { ArticleController } from "./magazine/article/article.controller.js";
 // import { CategoryController } from "./magazine/category/category.controller.js";
