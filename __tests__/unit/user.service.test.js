@@ -1,4 +1,4 @@
-import { UserService } from "../../src/users/user.service.js";
+import UserService from "../../src/users/user.service.js";
 import { User } from "../../src/users/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
