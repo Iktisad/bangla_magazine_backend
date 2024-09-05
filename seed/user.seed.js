@@ -2,7 +2,6 @@
 
 import bcrypt from "bcrypt";
 import { User } from "../src/users/user.model.js";
-import mongoose from "mongoose";
 
 export default async function seedUsers() {
     const users = [
@@ -89,7 +88,6 @@ export default async function seedUsers() {
     ];
 
     try {
-        mongoose.connect(global.__MONGOD__.getUri());
         await User.insertMany(users);
         // const list = await User.find({}).lean();
         // console.log(list);

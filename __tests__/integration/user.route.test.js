@@ -1,10 +1,9 @@
-// user.route.test.js
-
 import request from "supertest";
 import nodemailer from "nodemailer";
 import EmailService from "../../src/service/email.service.js";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import seedUsers from "../../seed/user.seed.js";
 import App from "../../src/app.js";
 
@@ -21,11 +20,6 @@ beforeAll(async () => {
     await seedUsers();
 
     app = new App().app;
-    // await seedtags();
-
-    // nodemailer.createTransport.mockReturnValue({
-    //     sendMail: mockSendMail,
-    // });
 });
 describe("User Module E2E Tests", () => {
     describe("POST: api/users/signup", () => {
@@ -286,12 +280,14 @@ describe("User Module E2E Tests", () => {
 
     describe("POST: api/users/me/photo", () => {
         it("should upload user profile photo successfully", async () => {
+            const filename = fileURLToPath(import.meta.url);
+            const dirname = path.dirname(filename);
             const response = await request(app)
                 .post("/api/users/me/photo")
                 .set("Authorization", `Bearer ${token}`)
                 .attach(
                     "photo",
-                    path.resolve(__dirname, "../../sample/profile.jpg")
+                    path.resolve(dirname, "../../sample/profile.jpg")
                 ); // The file won't actually be uploaded
 
             expect(response.status).toBe(200);

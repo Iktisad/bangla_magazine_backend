@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
-beforeAll(async () => {});
+beforeAll(async () => {
+    console.log("RUNNING LOCAL JEST SETUP");
+    // Ensure that the global connection is used in all test suites
+    await mongoose.connect(global.mongoURI);
+});
 beforeEach(async () => {
     nodemailer.createTransport.mockClear();
 });
