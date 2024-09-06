@@ -11,7 +11,6 @@ const seedTags = [
 
 export default async function seedtags() {
     try {
-        mongoose.connect(global.__MONGOD__.getUri());
         await Tag.insertMany(seedTags);
         console.log("Tags seeded successfully");
     } catch (error) {

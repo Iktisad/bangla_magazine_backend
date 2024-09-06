@@ -5,7 +5,6 @@ import { Category } from "../../src/magazine/category/category.model.js";
 let app;
 beforeAll(() => {
     app = new App().app;
-    mongoose.connect(global.__MONGOD__.getUri());
 });
 describe("Category E2E Tests", () => {
     describe("POST api/category", () => {
