@@ -56,7 +56,7 @@ Follow these steps to set up the project locally:
 
     DB_PORT=27017
     DB_NAME=bangla_web_magazine
-    DB_HOST=localhost
+    DB_HOST=localhost # or set this as 0.0.0.0 if there is a MongooseServer Selection Error
 
     # JWT for authentication
 

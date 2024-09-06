@@ -1,5 +1,5 @@
 import express from "express";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import di_container from "./di_container.js";
 import userRoutes from "./users/user.routes.js";
 // import articleRoutes from './src/magazine/article/article.routes.js';

@@ -30,11 +30,8 @@ export default class UserController {
         try {
             const { username, email } = req.query;
 
-            if (!username && !email) {
-                return res
-                    .status(400)
-                    .json({ message: "Username or email required" });
-            }
+            if (!username && !email)
+                throw new BadRequestException("Username or email required");
 
             let exists = null;
             if (username) {
@@ -51,6 +48,12 @@ export default class UserController {
                 logger.warn(error.message);
                 return res.status(error.statusCode).json({ exists: false });
             }
+            if (error instanceof BadRequestException) {
+                logger.warn(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
             next(error);
         }
     }
@@ -65,7 +68,6 @@ export default class UserController {
                 .send(
                     "Signup successful! Please check your email to verify your account."
                 );
-            // Send verification email (Implement sendVerificationEmail function)
         } catch (error) {
             if (error instanceof ConflictException) {
                 logger.warn(error.message);
@@ -109,7 +111,7 @@ export default class UserController {
     async verifyEmail(req, res, next) {
         try {
             const { token } = req.query;
-            const result = await this.userService.verifyUser(token);
+            await this.userService.verifyUser(token);
 
             return res
                 .status(200)
@@ -230,8 +232,6 @@ export default class UserController {
                 message: "Photo uploaded successfully",
                 user,
             });
-
-            //
         } catch (error) {
             if (
                 error instanceof BadRequestException ||
