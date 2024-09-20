@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import di_container from "./di_container.js";
 import userRoutes from "./users/user.routes.js";
 import tagRoutes from "./magazine/tag/tag.routes.js";
-// import articleRoutes from './src/magazine/article/article.routes.js';
+import mediaRoutes from "./magazine/media/media.routes.js";
 import categoryRoutes from "./magazine/category/category.routes.js";
 // import podcastRoutes from './src/podcast/podcast.routes.js';
 import { errorLogger, requestLogger } from "./middleware/logger.middleware.js";
@@ -35,10 +35,10 @@ export default class App {
             "/api/category",
             categoryRoutes(di_container.getController("categoryController"))
         );
-        // this.app.use(
-        //     '/api/articles',
-        //     articleRoutes(di_container.getController('articleController'))
-        // );
+        this.app.use(
+            "/api/media",
+            mediaRoutes(di_container.getController("mediaController"))
+        );
         // this.app.use(
         //     '/api/podcast',
         //     podcastRoutes(di_container.getController('podcastController'))

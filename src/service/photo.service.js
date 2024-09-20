@@ -66,4 +66,29 @@ export default class PhotoService {
             });
         });
     }
+
+    // Multiple file upload
+    static uploadMultipleOnDisc(req, res) {
+        return new Promise((resolve, reject) => {
+            upload.array("photos", 5)(req, res, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                if (req.files && req.files.length > 0) {
+                    // Create an array of URLs for each uploaded file
+                    const imageUrls = req.files.map((file) => {
+                        return `${uploadsDir}/${file.filename}`;
+                    });
+                    resolve(imageUrls);
+                } else {
+                    reject(
+                        new BadRequestException(
+                            "No files uploaded or invalid file types."
+                        )
+                    );
+                }
+            });
+        });
+    }
 }
