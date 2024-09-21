@@ -3,6 +3,7 @@ import {
     BadRequestException,
     NotFoundException,
 } from "../../exceptions/http.exception.js";
+import { User } from "../../users/user.model.js";
 import { Media } from "./media.model.js";
 import mongoose from "mongoose";
 
@@ -41,15 +42,17 @@ export default class MediaService {
 
         // If searching by creator (user), we match the creator's ObjectId
         if (query.creator) {
-            if (!mongoose.Types.ObjectId.isValid(query.creator)) {
-                throw new BadRequestException("Invalid creator ID format");
+            const creator = await User.findOne({ username: query.creator });
+            if (!creator) {
+                throw new NotFoundException("No such creator exists");
             }
-            searchCriteria.creator = query.creator;
+
+            searchCriteria.creator = creator._id;
         }
 
         // Query the database using the search criteria and populate the references
         return await Media.find(searchCriteria).populate(
-            "creator categoryIds tags"
+            "creator categoryIds hashtags"
         );
     }
 

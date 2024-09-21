@@ -1,4 +1,7 @@
-import { BadRequestException } from "../../exceptions/http.exception.js";
+import {
+    BadRequestException,
+    NotFoundException,
+} from "../../exceptions/http.exception.js";
 import logger from "../../service/logger.service.js";
 
 export default class MediaController {
@@ -45,6 +48,12 @@ export default class MediaController {
             const media = await this.mediaService.getAllMedia(req.query); // Pass query params to service
             return res.status(200).json(media);
         } catch (error) {
+            if (error instanceof NotFoundException) {
+                logger.error(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ error: error.message });
+            }
             // res.status(500).json({ error: error.message });
             next(error);
         }
@@ -56,6 +65,15 @@ export default class MediaController {
             return res.status(200).json(media);
         } catch (error) {
             // res.status(500).json({ error: error.message });
+            if (
+                error instanceof NotFoundException ||
+                error instanceof BadRequestException
+            ) {
+                logger.error(error.message);
+                return res
+                    .status(error.statusCode)
+                    .json({ error: error.message });
+            }
             next(error);
         }
     }
@@ -68,21 +86,26 @@ export default class MediaController {
             );
             return res.status(200).json(updatedMedia);
         } catch (error) {
-            // res.status(500).json({ error: error.message });
+            if (error instanceof NotFoundException) {
+                logger.error(error.message);
+                res.status(error.statusCode).json({ error: error.message });
+            }
+
             next(error);
         }
     }
 
     async deleteMedia(req, res, next) {
         try {
-            const deletedMedia = await this.mediaService.deleteMedia(
-                req.params.id
-            );
+            await this.mediaService.deleteMedia(req.params.id);
             return res
                 .status(200)
                 .json({ message: "Media deleted successfully" });
         } catch (error) {
-            // res.status(500).json({ error: error.message });
+            if (error instanceof NotFoundException) {
+                logger.error(error.message);
+                res.status(error.statusCode).json({ error: error.message });
+            }
             next(error);
         }
     }
