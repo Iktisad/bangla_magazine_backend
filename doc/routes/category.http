@@ -6,7 +6,7 @@ POST {{api}}
 Content-Type: application/json
 
 {
-    "category": ["Health", "Technology"]
+    "category": ["Artwork", "Photography"]
 }
 
 ###

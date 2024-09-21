@@ -43,7 +43,8 @@ class DIContainer {
         //     this.services.articleService
         // );
         this.controllers.mediaController = new MediaController(
-            this.services.artworkService
+            this.services.mediaService,
+            this.services.tagService
         );
         // this.controllers.podcastController = new PodcastController(
         //     this.podcastService

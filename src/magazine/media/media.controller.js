@@ -1,10 +1,10 @@
-import { BadRequestException } from "../../exceptions/http.exception";
-import logger from "../../service/logger.service";
-import PhotoService from "../../service/photo.service";
+import { BadRequestException } from "../../exceptions/http.exception.js";
+import logger from "../../service/logger.service.js";
 
 export default class MediaController {
-    constructor(MediaService) {
-        this.mediaService = new MediaService();
+    constructor(MediaService, TagService) {
+        this.mediaService = MediaService;
+        this.tagService = TagService;
         this.createMedia = this.createMedia.bind(this);
         this.getAllMedia = this.getAllMedia.bind(this);
         this.getMediaById = this.getMediaById.bind(this);
@@ -14,8 +14,19 @@ export default class MediaController {
 
     async createMedia(req, res, next) {
         try {
-            const mediaUrls = PhotoService.uploadMultipleOnDisc(req, res);
+            // Need to make sure the tags exist or create them
+            console.log(req.files);
+            // Get file urls
+            if (!req.files || req.files.length === 0) {
+                throw new BadRequestException("No photos were uploaded!");
+            }
+            const mediaUrls = req.files.map((file) => file.path);
             req.body.mediaUrls = mediaUrls;
+
+            const tagIds = await this.tagService.ensureTagsExist(
+                req.body.hashtags
+            );
+            req.body.hashtags = tagIds;
             const media = await this.mediaService.createMedia(req.body);
             return res.status(201).json(media);
         } catch (error) {

@@ -10,20 +10,18 @@ const mediaSchema = new mongoose.Schema(
             validate: [arrayLimit, "{PATH} exceeds the limit of 5"], // Custom validation for 5 images
             required: true,
         },
-        type: {
-            type: String,
-            enum: ["photo", "artwork"],
-            required: true,
-        },
         creator: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
         },
-        categoryIds: [
-            { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
-        ],
-        tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
+        categoryId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Category",
+            required: true,
+        },
+
+        hashtags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
     },
     { timestamps: true }
 );
