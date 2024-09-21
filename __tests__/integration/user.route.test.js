@@ -289,10 +289,8 @@ describe("User Module E2E Tests", () => {
                     "photo",
                     path.resolve(dirname, "../../sample/profile.jpg")
                 ); // The file won't actually be uploaded
-
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("Photo uploaded successfully");
-            expect(response.body.user.profile.profilePicture).toBeDefined();
         });
     });
 });

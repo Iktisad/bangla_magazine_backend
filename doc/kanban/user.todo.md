@@ -4,6 +4,7 @@
 
 -   🔴 When a new account is created or during login, if the token is valid, the email must be verified, or a resend option should be provided. If the token has expired, a new token should automatically be generated and sent to the email during the login process.
 -   🔴 Need to setup a frontend form for password reset in email service.
+-   🔴 when uploading a profile picture, if there is already one that exists, delete it and then update the path.
 
 ## 🔄 In Progress
 

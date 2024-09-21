@@ -1,6 +1,7 @@
 import express from "express";
 import { verifyToken, authorizeRoles } from "./auth/auth.middleware.js";
 import { validate, validateLogin, validateSignup } from "./user.validator.js";
+import { upload } from "../middleware/uploads.middleware.js";
 const router = express.Router();
 
 export default (userController) => {
@@ -43,7 +44,12 @@ export default (userController) => {
     );
 
     // Upload User Profile Photo
-    router.post("/me/photo", verifyToken, userController.uploadProfilePhoto);
+    router.post(
+        "/me/photo",
+        verifyToken,
+        upload.single("photo"),
+        userController.uploadProfilePhoto
+    );
 
     return router;
 };

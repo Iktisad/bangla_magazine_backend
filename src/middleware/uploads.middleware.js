@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({
+export const upload = multer({
     storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
     fileFilter: (req, file, cb) => {
@@ -44,26 +44,3 @@ const upload = multer({
         );
     },
 });
-
-export default class PhotoService {
-    static uploadSingleOnDisc(req, res) {
-        return new Promise((resolve, reject) => {
-            upload.single("photo")(req, res, (err) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                if (req.file) {
-                    const imageUrl = `${uploadsDir}/${req.file.filename}`;
-                    resolve(imageUrl);
-                } else {
-                    reject(
-                        new BadRequestException(
-                            "No file uploaded or invalid file type."
-                        )
-                    );
-                }
-            });
-        });
-    }
-}

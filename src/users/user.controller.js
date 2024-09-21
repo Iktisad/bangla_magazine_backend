@@ -6,7 +6,6 @@ import {
 } from "../exceptions/http.exception.js";
 import logger from "../service/logger.service.js";
 import EmailService from "../service/email.service.js";
-import PhotoService from "../service/photo.service.js";
 
 export default class UserController {
     constructor(UserService) {
@@ -219,11 +218,11 @@ export default class UserController {
     // ? needs more testing and error handling
     async uploadProfilePhoto(req, res, next) {
         try {
-            const imageUrl = await PhotoService.uploadSingleOnDisc(req, res);
+            if (!req.file) throw new BadRequestException("No photo uploaded");
             const user = await this.userService.updateUser(req.user.id, {
                 body: {
                     profile: {
-                        profilePicture: imageUrl,
+                        profilePicture: req.file.path,
                     },
                 },
             });
